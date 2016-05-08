@@ -1,0 +1,26 @@
+{
+  "name": "frampton-dom",
+  "version": "0.0.1",
+  "description": "A virtual-dom module for frampton.js",
+  "scripts": {
+    "test": "frampton test",
+    "build": "frampton build",
+    "docs": "rm -rfv docs/* && jsdoc dist/frampton-dom.js -d docs --readme README.md  --private"
+  },
+  "author": "Kevin Greene <hightimesteddy@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:framptonjs/frampton-dom.git"
+  },
+  "bugs": {
+    "url": "https://github.com/framptonjs/frampton-dom/issues"
+  },
+  "homepage": "https://github.com/framptonjs/frampton-dom",
+  "devDependencies": {
+    "broccoli": "^0.16.2",
+    "broccoli-cli": "^1.0.0",
+    "frampton-build": "*",
+    "qunitjs": "^1.16.0"
+  }
+}
