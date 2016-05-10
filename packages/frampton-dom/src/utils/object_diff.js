@@ -1,6 +1,6 @@
 import isObject from 'frampton-utils/is_object';
 
-export default function diff_props(oldProps, newProps) {
+export default function object_diff(oldProps, newProps) {
 
   var diff;
 
@@ -16,7 +16,7 @@ export default function diff_props(oldProps, newProps) {
 
     if (isObject(oldValue) && isObject(newValue)) {
       diff = (diff || {});
-      diff[key] = diff_props(oldValue, newValue);
+      diff[key] = object_diff(oldValue, newValue);
     } else if (oldValue !== newValue) {
       diff = (diff || {});
       diff[key] = newValue;

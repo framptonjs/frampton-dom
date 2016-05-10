@@ -2,8 +2,6 @@ import Frampton from 'frampton/namespace';
 
 import diff from 'frampton-dom/diff';
 import scene from 'frampton-dom/scene';
-import update from 'frampton-dom/update';
-import createElement from 'frampton-dom/utils/create_element';
 
 import {
   node, text,
@@ -25,10 +23,8 @@ import {
  */
 Frampton.DOM         = {};
 Frampton.DOM.VERSION = '0.0.1';
+Frampton.DOM.diff    = diff;
 Frampton.DOM.scene   = scene;
-Frampton.DOM.update  = update;
-Frampton.DOM.createElement = createElement;
-Frampton.DOM.diff = diff;
 
 /**
  * @name Html

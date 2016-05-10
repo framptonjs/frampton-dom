@@ -1,5 +1,5 @@
 import isText from 'frampton-dom/utils/is_text';
-import applyAttributes from 'frampton-dom/utils/apply_attributes';
+import applyAttributes from 'frampton-dom/ops/apply_attributes';
 
 const doc = window.document;
 

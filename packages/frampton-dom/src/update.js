@@ -1,5 +1,5 @@
 import diff from 'frampton-dom/diff';
-import applyPatch from 'frampton-dom/apply_patch';
+import applyPatch from 'frampton-dom/ops/apply_patch';
 
 /**
  * @param {Elemnt} rootNode The element to attach this update
@@ -8,6 +8,5 @@ import applyPatch from 'frampton-dom/apply_patch';
  */
 export default function run_update(rootNode, oldTree, newTree) {
   const patch = diff(oldTree, newTree);
-  console.log('update: patch: ', patch);
   applyPatch(patch, rootNode, rootNode);
 }

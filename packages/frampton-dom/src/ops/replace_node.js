@@ -1,4 +1,4 @@
-import createElement from 'frampton-dom/utils/create_element';
+import createElement from 'frampton-dom/ops/create_element';
 
 /*
  * @name replaceNode

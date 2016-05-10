@@ -13,7 +13,7 @@ var global = this;
   require = Frampton.__loader.require;
 
 }());
-define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'frampton-dom/scene', 'frampton-dom/update', 'frampton-dom/utils/create_element', 'frampton-dom/html/dom'], function (exports, _framptonNamespace, _framptonDomDiff, _framptonDomScene, _framptonDomUpdate, _framptonDomUtilsCreate_element, _framptonDomHtmlDom) {
+define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'frampton-dom/scene', 'frampton-dom/html/dom'], function (exports, _framptonNamespace, _framptonDomDiff, _framptonDomScene, _framptonDomHtmlDom) {
   'use strict';
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -24,10 +24,6 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
 
   var _scene = _interopRequireDefault(_framptonDomScene);
 
-  var _update = _interopRequireDefault(_framptonDomUpdate);
-
-  var _createElement = _interopRequireDefault(_framptonDomUtilsCreate_element);
-
   /**
    * @name DOM
    * @namespace
@@ -35,10 +31,8 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
    */
   _Frampton['default'].DOM = {};
   _Frampton['default'].DOM.VERSION = '0.0.1';
-  _Frampton['default'].DOM.scene = _scene['default'];
-  _Frampton['default'].DOM.update = _update['default'];
-  _Frampton['default'].DOM.createElement = _createElement['default'];
   _Frampton['default'].DOM.diff = _diff['default'];
+  _Frampton['default'].DOM.scene = _scene['default'];
 
   /**
    * @name Html
@@ -92,115 +86,7 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
   _Frampton['default'].DOM.Html.source = _framptonDomHtmlDom.source;
   _Frampton['default'].DOM.Html.figcaption = _framptonDomHtmlDom.figcaption;
 });
-define('frampton-dom/apply_patch', ['exports', 'module', 'frampton-dom/virtual/patch_types', 'frampton-dom/utils/apply_attributes', 'frampton-dom/utils/remove_node', 'frampton-dom/utils/replace_node', 'frampton-dom/utils/insert_node', 'frampton-dom/utils/update_text'], function (exports, module, _framptonDomVirtualPatch_types, _framptonDomUtilsApply_attributes, _framptonDomUtilsRemove_node, _framptonDomUtilsReplace_node, _framptonDomUtilsInsert_node, _framptonDomUtilsUpdate_text) {
-  'use strict';
-
-  module.exports = apply_patch;
-
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-  var _PATCHES = _interopRequireDefault(_framptonDomVirtualPatch_types);
-
-  var _applyAttributes = _interopRequireDefault(_framptonDomUtilsApply_attributes);
-
-  var _removeNode = _interopRequireDefault(_framptonDomUtilsRemove_node);
-
-  var _replaceNode = _interopRequireDefault(_framptonDomUtilsReplace_node);
-
-  var _insertNode = _interopRequireDefault(_framptonDomUtilsInsert_node);
-
-  var _updateText = _interopRequireDefault(_framptonDomUtilsUpdate_text);
-
-  function patchOperation(patch, parentNode, currentNode) {
-    var type = patch.type;
-    var update = patch.update;
-    switch (patch.type) {
-      case _PATCHES['default'].NONE:
-        break;
-      case _PATCHES['default'].INSERT:
-        return _insertNode['default'](parentNode, update);
-      case _PATCHES['default'].REMOVE:
-        return _removeNode['default'](currentNode);
-      case _PATCHES['default'].REPLACE:
-        return _replaceNode['default'](currentNode, update);
-      case _PATCHES['default'].PROPS:
-        return _applyAttributes['default'](currentNode, update);
-      case _PATCHES['default'].TEXT:
-        return _updateText['default'](currentNode, update);
-      default:
-        throw new Error('Unrecognized patch type: ' + type);
-    }
-  }
-
-  function nodeAtIndex(node, index) {
-    if (node && node.childNodes) {
-      return node.childNodes[index] || null;
-    } else {
-      return null;
-    }
-  }
-
-  /**
-   * @name applyPatch
-   * @param {Array} patch
-   * @param {Element} parent
-   * @param {Element} current
-   */
-
-  function apply_patch(patch, parent, current) {
-    for (var key in patch) {
-      if (key === '_p') {
-        patchOperation(patch[key], parent, current);
-      } else {
-        var child = nodeAtIndex(current, key);
-        apply_patch(patch[key], current, child);
-      }
-    }
-  }
-});
-define('frampton-dom/diff_props', ['exports', 'module', 'frampton-utils/is_object'], function (exports, module, _framptonUtilsIs_object) {
-  'use strict';
-
-  module.exports = diff_props;
-
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-  var _isObject = _interopRequireDefault(_framptonUtilsIs_object);
-
-  function diff_props(oldProps, newProps) {
-
-    var diff;
-
-    for (var key in oldProps) {
-
-      var oldValue = oldProps[key];
-      var newValue = newProps[key];
-
-      if (!newValue) {
-        diff = diff || {};
-        diff[key] = undefined;
-      }
-
-      if (_isObject['default'](oldValue) && _isObject['default'](newValue)) {
-        diff = diff || {};
-        diff[key] = diff_props(oldValue, newValue);
-      } else if (oldValue !== newValue) {
-        diff = diff || {};
-        diff[key] = newValue;
-      }
-    }
-
-    for (var key in newProps) {
-      if (!oldProps[key]) {
-        diff = diff || {};
-        diff[key] = newProps[key];
-      }
-    }
-
-    return diff;
-  }
-});
-define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_something', 'frampton-math/max', 'frampton-dom/virtual/patch', 'frampton-dom/utils/is_node', 'frampton-dom/utils/is_text', 'frampton-dom/diff_props'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_something, _framptonMathMax, _framptonDomVirtualPatch, _framptonDomUtilsIs_node, _framptonDomUtilsIs_text, _framptonDomDiff_props) {
+define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_something', 'frampton-math/max', 'frampton-dom/virtual/patch', 'frampton-dom/utils/is_node', 'frampton-dom/utils/is_text', 'frampton-dom/utils/object_diff'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_something, _framptonMathMax, _framptonDomVirtualPatch, _framptonDomUtilsIs_node, _framptonDomUtilsIs_text, _framptonDomUtilsObject_diff) {
   'use strict';
 
   module.exports = diff;
@@ -217,7 +103,7 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', '
 
   var _isText = _interopRequireDefault(_framptonDomUtilsIs_text);
 
-  var _diffProps = _interopRequireDefault(_framptonDomDiff_props);
+  var _objectDiff = _interopRequireDefault(_framptonDomUtilsObject_diff);
 
   function keysMatch(oldKey, newKey) {
     return oldKey !== undefined && newKey !== undefined && oldKey === newKey;
@@ -235,7 +121,7 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', '
       if (_isNode['default'](newNode)) {
         if (_isNode['default'](oldNode)) {
           if (isSameNode(oldNode, newNode)) {
-            var propsDiff = _diffProps['default'](oldNode.attributes, newNode.attributes);
+            var propsDiff = _objectDiff['default'](oldNode.attributes, newNode.attributes);
             if (_isSomething['default'](propsDiff)) {
               newPatch = _framptonDomVirtualPatch.props(oldNode, propsDiff);
             }
@@ -525,6 +411,237 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
   exports.em = em;
 });
+define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-style/apply_styles'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_object, _framptonUtilsWarn, _framptonStyleApply_styles) {
+  'use strict';
+
+  module.exports = apply_attributes;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _isNothing = _interopRequireDefault(_framptonUtilsIs_nothing);
+
+  var _isObject = _interopRequireDefault(_framptonUtilsIs_object);
+
+  var _warn = _interopRequireDefault(_framptonUtilsWarn);
+
+  var _applyStyles = _interopRequireDefault(_framptonStyleApply_styles);
+
+  function apply_attributes(node, attrs) {
+    for (var _name in attrs) {
+      var value = attrs[_name];
+      if (_isNothing['default'](value)) {
+        node.removeAttribute(_name);
+      } else {
+        if (_name === 'style') {
+          if (_isObject['default'](value)) {
+            _applyStyles['default'](node, value);
+          } else {
+            _warn['default']('Style attribute is not an object');
+          }
+        }
+        node.setAttribute(_name, value);
+      }
+    }
+  }
+});
+define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtual/patch_types', 'frampton-dom/ops/apply_attributes', 'frampton-dom/ops/remove_node', 'frampton-dom/ops/replace_node', 'frampton-dom/ops/insert_node', 'frampton-dom/ops/update_text'], function (exports, module, _framptonDomVirtualPatch_types, _framptonDomOpsApply_attributes, _framptonDomOpsRemove_node, _framptonDomOpsReplace_node, _framptonDomOpsInsert_node, _framptonDomOpsUpdate_text) {
+  'use strict';
+
+  module.exports = apply_patch;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _PATCHES = _interopRequireDefault(_framptonDomVirtualPatch_types);
+
+  var _applyAttributes = _interopRequireDefault(_framptonDomOpsApply_attributes);
+
+  var _removeNode = _interopRequireDefault(_framptonDomOpsRemove_node);
+
+  var _replaceNode = _interopRequireDefault(_framptonDomOpsReplace_node);
+
+  var _insertNode = _interopRequireDefault(_framptonDomOpsInsert_node);
+
+  var _updateText = _interopRequireDefault(_framptonDomOpsUpdate_text);
+
+  function patchOperation(patch, parentNode, currentNode) {
+    var type = patch.type;
+    var update = patch.update;
+    switch (patch.type) {
+      case _PATCHES['default'].NONE:
+        break;
+      case _PATCHES['default'].INSERT:
+        return _insertNode['default'](parentNode, update);
+      case _PATCHES['default'].REMOVE:
+        return _removeNode['default'](currentNode);
+      case _PATCHES['default'].REPLACE:
+        return _replaceNode['default'](currentNode, update);
+      case _PATCHES['default'].PROPS:
+        return _applyAttributes['default'](currentNode, update);
+      case _PATCHES['default'].TEXT:
+        return _updateText['default'](currentNode, update);
+      default:
+        throw new Error('Unrecognized patch type: ' + type);
+    }
+  }
+
+  function nodeAtIndex(node, index) {
+    if (node && node.childNodes) {
+      return node.childNodes[index] || null;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * @name applyPatch
+   * @param {Array} patch
+   * @param {Element} parent
+   * @param {Element} current
+   */
+
+  function apply_patch(patch, parent, current) {
+    for (var key in patch) {
+      if (key === '_p') {
+        patchOperation(patch[key], parent, current);
+      } else {
+        var child = nodeAtIndex(current, key);
+        apply_patch(patch[key], current, child);
+      }
+    }
+  }
+});
+define('frampton-dom/ops/create_element', ['exports', 'module', 'frampton-dom/utils/is_text', 'frampton-dom/ops/apply_attributes'], function (exports, module, _framptonDomUtilsIs_text, _framptonDomOpsApply_attributes) {
+  'use strict';
+
+  module.exports = create_element;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _isText = _interopRequireDefault(_framptonDomUtilsIs_text);
+
+  var _applyAttributes = _interopRequireDefault(_framptonDomOpsApply_attributes);
+
+  var doc = window.document;
+
+  /*
+   * Take a VirtualNode and turns it into real DOM
+   *
+   * @name createElement
+   * @memberOf Frampton.DOM
+   * @method
+   * @private
+   * @param {VirtualNode}
+   * @returns {Element} A new HTML Element
+   */
+
+  function create_element(vnode) {
+
+    if (_isText['default'](vnode)) {
+      return doc.createTextNode(vnode.text);
+    }
+
+    var children = vnode.children;
+    var len = children.length;
+    var node = doc.createElement(vnode.tagName);
+    _applyAttributes['default'](node, vnode.attributes);
+
+    for (var i = 0; i < len; i++) {
+      var childNode = create_element(children[i]);
+      if (childNode) {
+        node.appendChild(childNode);
+      }
+    }
+
+    return node;
+  }
+});
+define('frampton-dom/ops/insert_node', ['exports', 'module', 'frampton-dom/ops/create_element'], function (exports, module, _framptonDomOpsCreate_element) {
+  'use strict';
+
+  module.exports = insert_node;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _createElement = _interopRequireDefault(_framptonDomOpsCreate_element);
+
+  /*
+   * @name insertNode
+   * @memberOf Frampton.DOM
+   * @method
+   * @private
+   * @param {Element} parent
+   * @param {VirtualNode} vnode
+   */
+
+  function insert_node(parent, vnode) {
+    var newNode = _createElement['default'](vnode);
+    if (parent) {
+      parent.appendChild(newNode);
+    }
+  }
+});
+define("frampton-dom/ops/remove_node", ["exports", "module"], function (exports, module) {
+  /*
+   * @name removeNode
+   * @memberOf Frampton.DOM
+   * @method
+   * @private
+   * @param {Element} node
+   */
+  "use strict";
+
+  module.exports = remove_node;
+
+  function remove_node(node) {
+    var parent = node.parentNode;
+    if (parent) {
+      parent.removeChild(node);
+    }
+  }
+});
+define('frampton-dom/ops/replace_node', ['exports', 'module', 'frampton-dom/ops/create_element'], function (exports, module, _framptonDomOpsCreate_element) {
+  'use strict';
+
+  module.exports = replace_node;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _createElement = _interopRequireDefault(_framptonDomOpsCreate_element);
+
+  /*
+   * @name replaceNode
+   * @memberOf Frampton.DOM
+   * @method
+   * @private
+   * @param {Element} oldNode Node to replace
+   * @param {VirtualNode} vnode VirtualNode representing replacement
+   */
+
+  function replace_node(oldNode, vnode) {
+    var parent = oldNode.parentNode;
+    var newNode = _createElement['default'](vnode);
+    if (parent) {
+      parent.replaceChild(newNode, oldNode);
+    }
+  }
+});
+define("frampton-dom/ops/update_text", ["exports", "module"], function (exports, module) {
+  /*
+   * @name updateText
+   * @memberOf Frampton.DOM
+   * @method
+   * @private
+   * @param {Element} node Node to update
+   * @param {String} text New text to display
+   */
+  "use strict";
+
+  module.exports = update_text;
+
+  function update_text(node, text) {
+    node.textContent = text;
+  }
+});
 define('frampton-dom/scene', ['exports', 'module', 'frampton-dom/utils/request_frame', 'frampton-dom/update'], function (exports, module, _framptonDomUtilsRequest_frame, _framptonDomUpdate) {
   'use strict';
 
@@ -583,7 +700,7 @@ define('frampton-dom/scene', ['exports', 'module', 'frampton-dom/utils/request_f
     };
   }
 });
-define('frampton-dom/update', ['exports', 'module', 'frampton-dom/diff', 'frampton-dom/apply_patch'], function (exports, module, _framptonDomDiff, _framptonDomApply_patch) {
+define('frampton-dom/update', ['exports', 'module', 'frampton-dom/diff', 'frampton-dom/ops/apply_patch'], function (exports, module, _framptonDomDiff, _framptonDomOpsApply_patch) {
   'use strict';
 
   module.exports = run_update;
@@ -592,7 +709,7 @@ define('frampton-dom/update', ['exports', 'module', 'frampton-dom/diff', 'frampt
 
   var _diff = _interopRequireDefault(_framptonDomDiff);
 
-  var _applyPatch = _interopRequireDefault(_framptonDomApply_patch);
+  var _applyPatch = _interopRequireDefault(_framptonDomOpsApply_patch);
 
   /**
    * @param {Elemnt} rootNode The element to attach this update
@@ -602,111 +719,7 @@ define('frampton-dom/update', ['exports', 'module', 'frampton-dom/diff', 'frampt
 
   function run_update(rootNode, oldTree, newTree) {
     var patch = _diff['default'](oldTree, newTree);
-    console.log('update: patch: ', patch);
     _applyPatch['default'](patch, rootNode, rootNode);
-  }
-});
-define('frampton-dom/utils/apply_attributes', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-style/apply_styles'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_object, _framptonUtilsWarn, _framptonStyleApply_styles) {
-  'use strict';
-
-  module.exports = apply_attributes;
-
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-  var _isNothing = _interopRequireDefault(_framptonUtilsIs_nothing);
-
-  var _isObject = _interopRequireDefault(_framptonUtilsIs_object);
-
-  var _warn = _interopRequireDefault(_framptonUtilsWarn);
-
-  var _applyStyles = _interopRequireDefault(_framptonStyleApply_styles);
-
-  function apply_attributes(node, attrs) {
-    for (var _name in attrs) {
-      var value = attrs[_name];
-      if (_isNothing['default'](value)) {
-        node.removeAttribute(_name);
-      } else {
-        if (_name === 'style') {
-          if (_isObject['default'](value)) {
-            _applyStyles['default'](node, value);
-          } else {
-            _warn['default']('Style attribute is not an object');
-          }
-        }
-        node.setAttribute(_name, value);
-      }
-    }
-  }
-});
-define('frampton-dom/utils/create_element', ['exports', 'module', 'frampton-dom/utils/is_text', 'frampton-dom/utils/apply_attributes'], function (exports, module, _framptonDomUtilsIs_text, _framptonDomUtilsApply_attributes) {
-  'use strict';
-
-  module.exports = create_element;
-
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-  var _isText = _interopRequireDefault(_framptonDomUtilsIs_text);
-
-  var _applyAttributes = _interopRequireDefault(_framptonDomUtilsApply_attributes);
-
-  var doc = window.document;
-
-  /*
-   * Take a VirtualNode and turns it into real DOM
-   *
-   * @name createElement
-   * @memberOf Frampton.DOM
-   * @method
-   * @private
-   * @param {VirtualNode}
-   * @returns {Element} A new HTML Element
-   */
-
-  function create_element(vnode) {
-
-    if (_isText['default'](vnode)) {
-      return doc.createTextNode(vnode.text);
-    }
-
-    var children = vnode.children;
-    var len = children.length;
-    var node = doc.createElement(vnode.tagName);
-    _applyAttributes['default'](node, vnode.attributes);
-
-    for (var i = 0; i < len; i++) {
-      var childNode = create_element(children[i]);
-      if (childNode) {
-        node.appendChild(childNode);
-      }
-    }
-
-    return node;
-  }
-});
-define('frampton-dom/utils/insert_node', ['exports', 'module', 'frampton-dom/utils/create_element'], function (exports, module, _framptonDomUtilsCreate_element) {
-  'use strict';
-
-  module.exports = insert_node;
-
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-  var _createElement = _interopRequireDefault(_framptonDomUtilsCreate_element);
-
-  /*
-   * @name insertNode
-   * @memberOf Frampton.DOM
-   * @method
-   * @private
-   * @param {Element} parent
-   * @param {VirtualNode} vnode
-   */
-
-  function insert_node(parent, vnode) {
-    var newNode = _createElement['default'](vnode);
-    if (parent) {
-      parent.appendChild(newNode);
-    }
   }
 });
 define('frampton-dom/utils/is_node', ['exports', 'module', 'frampton-utils/is_object'], function (exports, module, _framptonUtilsIs_object) {
@@ -735,49 +748,46 @@ define('frampton-dom/utils/is_text', ['exports', 'module', 'frampton-utils/is_ob
     return _isObject['default'](node) && node.ctor === 'VirtualText';
   }
 });
-define("frampton-dom/utils/remove_node", ["exports", "module"], function (exports, module) {
-  /*
-   * @name removeNode
-   * @memberOf Frampton.DOM
-   * @method
-   * @private
-   * @param {Element} node
-   */
-  "use strict";
-
-  module.exports = remove_node;
-
-  function remove_node(node) {
-    var parent = node.parentNode;
-    if (parent) {
-      parent.removeChild(node);
-    }
-  }
-});
-define('frampton-dom/utils/replace_node', ['exports', 'module', 'frampton-dom/utils/create_element'], function (exports, module, _framptonDomUtilsCreate_element) {
+define('frampton-dom/utils/object_diff', ['exports', 'module', 'frampton-utils/is_object'], function (exports, module, _framptonUtilsIs_object) {
   'use strict';
 
-  module.exports = replace_node;
+  module.exports = object_diff;
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-  var _createElement = _interopRequireDefault(_framptonDomUtilsCreate_element);
+  var _isObject = _interopRequireDefault(_framptonUtilsIs_object);
 
-  /*
-   * @name replaceNode
-   * @memberOf Frampton.DOM
-   * @method
-   * @private
-   * @param {Element} oldNode Node to replace
-   * @param {VirtualNode} vnode VirtualNode representing replacement
-   */
+  function object_diff(oldProps, newProps) {
 
-  function replace_node(oldNode, vnode) {
-    var parent = oldNode.parentNode;
-    var newNode = _createElement['default'](vnode);
-    if (parent) {
-      parent.replaceChild(newNode, oldNode);
+    var diff;
+
+    for (var key in oldProps) {
+
+      var oldValue = oldProps[key];
+      var newValue = newProps[key];
+
+      if (!newValue) {
+        diff = diff || {};
+        diff[key] = undefined;
+      }
+
+      if (_isObject['default'](oldValue) && _isObject['default'](newValue)) {
+        diff = diff || {};
+        diff[key] = object_diff(oldValue, newValue);
+      } else if (oldValue !== newValue) {
+        diff = diff || {};
+        diff[key] = newValue;
+      }
     }
+
+    for (var key in newProps) {
+      if (!oldProps[key]) {
+        diff = diff || {};
+        diff[key] = newProps[key];
+      }
+    }
+
+    return diff;
   }
 });
 define('frampton-dom/utils/request_frame', ['exports', 'module', 'frampton-utils/is_function'], function (exports, module, _framptonUtilsIs_function) {
@@ -794,23 +804,6 @@ define('frampton-dom/utils/request_frame', ['exports', 'module', 'frampton-utils
       setTimeout(callback, 1000 / 60);
     }
   };
-});
-define("frampton-dom/utils/update_text", ["exports", "module"], function (exports, module) {
-  /*
-   * @name updateText
-   * @memberOf Frampton.DOM
-   * @method
-   * @private
-   * @param {Element} node Node to update
-   * @param {String} text New text to display
-   */
-  "use strict";
-
-  module.exports = update_text;
-
-  function update_text(node, text) {
-    node.textContent = text;
-  }
 });
 define('frampton-dom/virtual/node', ['exports', 'module', 'frampton-list/length', 'frampton-utils/is_array', 'frampton-utils/is_object', 'frampton-utils/is_string'], function (exports, module, _framptonListLength, _framptonUtilsIs_array, _framptonUtilsIs_object, _framptonUtilsIs_string) {
   'use strict';

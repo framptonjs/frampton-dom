@@ -1,6 +1,6 @@
-import diff from 'frampton-dom/diff_props';
+import diff from 'frampton-dom/utils/object_diff';
 
-QUnit.module('Frampton.DOM.diffProps');
+QUnit.module('Frampton.DOM.Utils.objectDiff');
 
 QUnit.test('Should correctly diff two objects', function() {
   const oldProps = {

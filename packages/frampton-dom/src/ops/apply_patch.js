@@ -1,9 +1,9 @@
 import PATCHES from 'frampton-dom/virtual/patch_types';
-import applyAttributes from 'frampton-dom/utils/apply_attributes';
-import removeNode from 'frampton-dom/utils/remove_node';
-import replaceNode from 'frampton-dom/utils/replace_node';
-import insertNode from 'frampton-dom/utils/insert_node';
-import updateText from 'frampton-dom/utils/update_text';
+import applyAttributes from 'frampton-dom/ops/apply_attributes';
+import removeNode from 'frampton-dom/ops/remove_node';
+import replaceNode from 'frampton-dom/ops/replace_node';
+import insertNode from 'frampton-dom/ops/insert_node';
+import updateText from 'frampton-dom/ops/update_text';
 
 function patchOperation(patch, parentNode, currentNode) {
   const type = patch.type;
