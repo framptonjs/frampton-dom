@@ -32,7 +32,9 @@ function isSameNode(oldNode, newNode) {
 
 function walk(oldNode, newNode) {
   var newPatch, patch;
-  if (isNothing(newNode)) {
+  if (oldNode === newNode) {
+    return;
+  } else if (isNothing(newNode)) {
     newPatch = remove(oldNode, null);
   } else {
     if (isNode(newNode)) {
@@ -91,11 +93,11 @@ function diffChildren(oldNode, newNode) {
 
 /**
  * @name diff
- * @param {VirtualNode} oldTree The old virtual tree
- * @param {VirtualNode} newTree The virtual tree to diff against
+ * @param {Frampton.DOM.VirtualNode} oldTree The old virtual tree
+ * @param {Frampton.DOM.VirtualNode} newTree The virtual tree to diff against
  * @param {Array} patch
  */
 export default function diff(oldTree, newTree) {
-  const patch = walk(oldTree, newTree);
+  const patch = (walk(oldTree, newTree) || []);
   return [patch];
 }

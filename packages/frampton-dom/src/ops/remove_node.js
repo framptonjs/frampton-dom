@@ -1,3 +1,5 @@
+import { removeEvents } from 'frampton-dom/events/event_dispatcher';
+
 /*
  * @name removeNode
  * @memberOf Frampton.DOM
@@ -8,6 +10,7 @@
 export default function remove_node(node) {
   const parent = node.parentNode;
   if (parent) {
+    removeEvents(node);
     parent.removeChild(node);
   }
 }

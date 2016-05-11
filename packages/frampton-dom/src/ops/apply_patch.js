@@ -5,7 +5,7 @@ import replaceNode from 'frampton-dom/ops/replace_node';
 import insertNode from 'frampton-dom/ops/insert_node';
 import updateText from 'frampton-dom/ops/update_text';
 
-function patchOperation(patch, parentNode, currentNode) {
+function executePatch(patch, parentNode, currentNode) {
   const type = patch.type;
   const update = patch.update;
   switch(patch.type) {
@@ -43,7 +43,7 @@ function nodeAtIndex(node, index) {
 export default function apply_patch(patch, parent, current) {
   for (let key in patch) {
     if (key === '_p') {
-      patchOperation(patch[key], parent, current);
+      executePatch(patch[key], parent, current);
     } else {
       const child = nodeAtIndex(current, key);
       apply_patch(patch[key], current, child);

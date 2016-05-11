@@ -1,7 +1,7 @@
 import Frampton from 'frampton/namespace';
 
 import diff from 'frampton-dom/diff';
-import scene from 'frampton-dom/scene';
+import update from 'frampton-dom/update';
 
 import {
   node, text,
@@ -22,9 +22,9 @@ import {
  * @memberof Frampton
  */
 Frampton.DOM         = {};
-Frampton.DOM.VERSION = '0.0.1';
+Frampton.DOM.VERSION = '0.0.2';
 Frampton.DOM.diff    = diff;
-Frampton.DOM.scene   = scene;
+Frampton.DOM.update  = update;
 
 /**
  * @name Html
