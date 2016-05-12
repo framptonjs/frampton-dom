@@ -1,67 +1,48 @@
-import isNothing from 'frampton-utils/is_nothing';
+import isDefined from 'frampton-utils/is_defined';
+import isUndefined from 'frampton-utils/is_undefined';
 import isSomething from 'frampton-utils/is_something';
+import warn from 'frampton-utils/warn';
 import max from 'frampton-math/max';
 import {
-  remove,
   insert,
-  replace,
   props,
-  text
+  text,
+  reorder,
+  replace
 } from 'frampton-dom/virtual/patch';
 import isNode from 'frampton-dom/utils/is_node';
 import isText from 'frampton-dom/utils/is_text';
-import diffProps from 'frampton-dom/utils/diff_props';
+import propsDiff from 'frampton-dom/utils/props_diff';
+import isSameNode from 'frampton-dom/utils/is_same_node';
 
-function keysMatch(oldKey, newKey) {
+function indexesMatch(oldIndex, newIndex) {
   return (
-    oldKey !== undefined &&
-    newKey !== undefined &&
-    oldKey === newKey
+    isDefined(oldIndex) &&
+    isDefined(newIndex) &&
+    oldIndex === newIndex
   );
 }
 
-function isSameNode(oldNode, newNode) {
-  return (
-    oldNode.tagName === newNode.tagName &&
-    (
-      keysMatch(oldNode.attributes.key, newNode.attributes.key) ||
-      keysMatch(oldNode.attributes.id, newNode.attributes.id)
-    )
-  );
-}
-
-function walk(oldNode, newNode) {
-  var newPatch, patch;
-  if (oldNode === newNode) {
+function diffTrees(oldTree, newTree) {
+  var patch, newPatch;
+  if (oldTree === newTree) {
     return;
-  } else if (isNothing(newNode)) {
-    newPatch = remove(oldNode, null);
-  } else {
-    if (isNode(newNode)) {
-      if (isNode(oldNode)) {
-        if (isSameNode(oldNode, newNode)) {
-          const propsDiff = diffProps(oldNode.attributes, newNode.attributes);
-          if (isSomething(propsDiff)) {
-            newPatch = props(oldNode, propsDiff);
-          }
-          patch = diffChildren(oldNode, newNode, patch);
-        } else {
-          newPatch = replace(oldNode, newNode);
+  } else if (isNode(newTree)) {
+    if (isNode(oldTree)) {
+      if (isSameNode(oldTree, newTree)) {
+        const pDiff = propsDiff(oldTree, newTree);
+        if (isSomething(pDiff)) {
+          newPatch = props(null, pDiff);
         }
+        patch = diffChildren(oldTree, newTree);
       } else {
-        newPatch = insert(null, newNode);
+        newPatch = replace(oldTree, newTree);
       }
-    } else if (isText(newNode)) {
-      if (isText(oldNode)) {
-        if (oldNode.text !== newNode.text) {
-          newPatch = text(oldNode, newNode.text);
-        }
-      } else {
-        newPatch = replace(oldNode, newNode);
-      }
-    } else if (isSomething(oldNode)) {
-      newPatch = remove(oldNode, null);
+    } else {
+      newPatch = insert(null, newTree);
     }
+  } else {
+    throw new Error('Root of DOM should be a VirtualNode');
   }
 
   if (newPatch) {
@@ -73,22 +54,197 @@ function walk(oldNode, newNode) {
 }
 
 function diffChildren(oldNode, newNode) {
-  var patch;
+
+  // Same reference
+  if (oldNode === newNode) { return; }
+
   const oldChildren = oldNode.children;
   const newChildren = newNode.children;
-  const len = max(oldChildren.length, newChildren.length);
+  const nLength = newChildren.length;
+  const oLength = oldChildren.length;
+  const len = max(oLength, nLength);
+  const orderMap = [];
+  const inserts = [];
+  const newKeys = {};
+  const oldKeys = {};
+  let dirty = false;
+  let parentPatch;
+
+  // Create a map of keys to their new index
+  for (let i = 0; i < nLength; i++) {
+    let child = newChildren[i];
+    if (isNode(child)) {
+      const key = child.key;
+      if (key) {
+        newKeys[key] = i;
+      }
+    }
+  }
+
+  // Create a map of keys to their old index
+  for (let i = 0; i < oLength; i++) {
+    let child = oldChildren[i];
+    if (isNode(child)) {
+      const key = child.key;
+      if (key) {
+        oldKeys[key] = i;
+      }
+    }
+  }
 
   for (let i = 0; i < len; i++) {
     const oldChild = oldChildren[i];
     const newChild = newChildren[i];
-    const newPatch = walk(oldChild, newChild);
+    let newIndex;
+    let oldIndex;
+    let newPatch;
+    let patch;
+
+    // We have a new node
+    if (isNode(newChild)) {
+
+      // Index of new node in previous DOM
+      oldIndex = oldKeys[newChild.key];
+
+      // We have an old node
+      if (isNode(oldChild)) {
+
+        // Index of old node in new DOM
+        newIndex = newKeys[oldChild.key];
+
+        // If old and new are the same, no changes
+        if (indexesMatch(oldIndex, newIndex)) {
+          orderMap[i] = i;
+          const pDiff = propsDiff(oldChild, newChild);
+          if (isSomething(pDiff)) {
+            newPatch = props(null, pDiff);
+          }
+          patch = diffChildren(oldChild, newChild);
+        } else {
+
+          // Old node has no new index, delete it
+          if (isUndefined(newIndex)) {
+            dirty = true;
+            orderMap[i] = undefined;
+
+          // The index changed, we have a move
+          } else if (newIndex !== i) {
+            dirty = true;
+            orderMap[i] = newIndex;
+            const pDiff = propsDiff(oldChild, newChildren[newIndex]);
+            if (isSomething(pDiff)) {
+              newPatch = props(null, pDiff);
+            }
+            patch = diffChildren(oldChild, newChildren[newIndex]);
+          }
+
+          // The new node is an insert
+          if (isUndefined(oldIndex)) {
+            inserts[i] = insert(null, newChild);
+          }
+        }
+
+      // We have no old node, or it is text
+      } else if (isUndefined(oldIndex)) {
+        dirty = true;
+        orderMap[i] = undefined;
+        inserts[i] = insert(null, newChild);
+      }
+
+    // New node is text
+    } else if (isText(newChild)) {
+
+      // Old node was text
+      if (isText(oldChild)) {
+
+        // Text nodes are the same if they have same text, duh.
+        if (oldChild.text !== newChild.text) {
+          orderMap[i] = i;
+          newPatch = text(oldChild, newChild.text);
+
+        // Yup, the same.
+        } else {
+          orderMap[i] = i;
+        }
+
+      // Old node was a node
+      } else if (isNode(oldChild)) {
+        dirty = true;
+        newIndex = newKeys[oldChild.key];
+
+        // Old node was deleted
+        if (isUndefined(newIndex)) {
+          orderMap[i] = undefined;
+
+        // Old node was moved
+        } else if (newIndex !== i) {
+          orderMap[i] = newIndex;
+          const pDiff = propsDiff(oldChild, newChildren[newIndex]);
+          if (isSomething(pDiff)) {
+            newPatch = props(null, pDiff);
+          }
+          patch = diffChildren(oldChild, newChildren[newIndex]);
+
+        // Shouldn't happen
+        } else {
+          warn('Should not get here, new node is text');
+        }
+
+        inserts[i] = insert(null, newChild);
+
+      // No old node, straigh insert
+      } else {
+        inserts[i] = insert(null, newChild);
+      }
+
+    // If there is no new node here, index is vacant
+    } else {
+
+      // This is going to be dirty somehow
+      dirty = true;
+
+      if (isDefined(newKeys)) {
+        // Index of old node in new DOM
+        newIndex = newKeys[oldChild.key];
+
+        if (isDefined(newIndex)) {
+          dirty = true;
+          orderMap[i] = newIndex;
+          const pDiff = propsDiff(oldChild, newChildren[newIndex]);
+          if (isSomething(pDiff)) {
+            newPatch = props(null, pDiff);
+          }
+          patch = diffChildren(oldChild, newChildren[newIndex]);
+        } else {
+          orderMap[i] = undefined;
+        }
+      } else {
+        orderMap[i] = undefined;
+      }
+    }
+
     if (newPatch) {
       patch = (patch || []);
-      patch[i] = newPatch;
+      patch._p = newPatch;
+    }
+
+    if (patch) {
+      parentPatch = (parentPatch || []);
+      parentPatch[i] = patch;
     }
   }
 
-  return patch;
+  if (dirty) {
+    parentPatch = (parentPatch || []);
+    parentPatch._o = reorder(null, orderMap);
+  }
+
+  if (inserts.length > 0) {
+    parentPatch = (parentPatch || []);
+    parentPatch._i = inserts;
+  }
+
+  return parentPatch;
 }
 
 /**
@@ -98,6 +254,6 @@ function diffChildren(oldNode, newNode) {
  * @param {Array} patch
  */
 export default function diff(oldTree, newTree) {
-  const patch = (walk(oldTree, newTree) || []);
+  const patch = (diffTrees(oldTree, newTree) || []);
   return [patch];
 }

@@ -29,6 +29,8 @@ export default function VirtualNode(name, attrs, children) {
 
   return {
     ctor : 'VirtualNode',
+    id : attrs.id,
+    key : (attrs.key || attrs.id),
     tagName : name,
     attributes : attrs,
     children : children,

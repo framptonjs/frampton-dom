@@ -8,9 +8,13 @@ import createElement from 'frampton-dom/ops/create_element';
  * @param {Element} parent
  * @param {VirtualNode} vnode
  */
-export default function insert_node(parent, vnode) {
-  const newNode = createElement(vnode);
+export default function insert_node(parent, current, update) {
+  const newNode = createElement(update);
   if (parent) {
-    parent.appendChild(newNode);
+    if (current) {
+      parent.insertBefore(newNode, current);
+    } else {
+      parent.appendChild(newNode);
+    }
   }
 }

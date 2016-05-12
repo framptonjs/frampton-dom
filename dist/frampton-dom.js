@@ -13,7 +13,7 @@ var global = this;
   require = Frampton.__loader.require;
 
 }());
-define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'frampton-dom/update', 'frampton-dom/html/dom'], function (exports, _framptonNamespace, _framptonDomDiff, _framptonDomUpdate, _framptonDomHtmlDom) {
+define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'frampton-dom/update', 'frampton-dom/utils/diff_props', 'frampton-dom/html/dom'], function (exports, _framptonNamespace, _framptonDomDiff, _framptonDomUpdate, _framptonDomUtilsDiff_props, _framptonDomHtmlDom) {
   'use strict';
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -24,6 +24,8 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
 
   var _update = _interopRequireDefault(_framptonDomUpdate);
 
+  var _propsDiff = _interopRequireDefault(_framptonDomUtilsDiff_props);
+
   /**
    * @name DOM
    * @namespace
@@ -33,6 +35,7 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
   _Frampton['default'].DOM.VERSION = '0.0.2';
   _Frampton['default'].DOM.diff = _diff['default'];
   _Frampton['default'].DOM.update = _update['default'];
+  _Frampton['default'].DOM.props = _propsDiff['default'];
 
   /**
    * @name Html
@@ -86,16 +89,20 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
   _Frampton['default'].DOM.Html.source = _framptonDomHtmlDom.source;
   _Frampton['default'].DOM.Html.figcaption = _framptonDomHtmlDom.figcaption;
 });
-define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_something', 'frampton-math/max', 'frampton-dom/virtual/patch', 'frampton-dom/utils/is_node', 'frampton-dom/utils/is_text', 'frampton-dom/utils/diff_props'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_something, _framptonMathMax, _framptonDomVirtualPatch, _framptonDomUtilsIs_node, _framptonDomUtilsIs_text, _framptonDomUtilsDiff_props) {
+define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_defined', 'frampton-utils/is_undefined', 'frampton-utils/is_something', 'frampton-utils/warn', 'frampton-math/max', 'frampton-dom/virtual/patch', 'frampton-dom/utils/is_node', 'frampton-dom/utils/is_text', 'frampton-dom/utils/props_diff', 'frampton-dom/utils/is_same_node'], function (exports, module, _framptonUtilsIs_defined, _framptonUtilsIs_undefined, _framptonUtilsIs_something, _framptonUtilsWarn, _framptonMathMax, _framptonDomVirtualPatch, _framptonDomUtilsIs_node, _framptonDomUtilsIs_text, _framptonDomUtilsProps_diff, _framptonDomUtilsIs_same_node) {
   'use strict';
 
   module.exports = diff;
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-  var _isNothing = _interopRequireDefault(_framptonUtilsIs_nothing);
+  var _isDefined = _interopRequireDefault(_framptonUtilsIs_defined);
+
+  var _isUndefined = _interopRequireDefault(_framptonUtilsIs_undefined);
 
   var _isSomething = _interopRequireDefault(_framptonUtilsIs_something);
+
+  var _warn = _interopRequireDefault(_framptonUtilsWarn);
 
   var _max = _interopRequireDefault(_framptonMathMax);
 
@@ -103,48 +110,34 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', '
 
   var _isText = _interopRequireDefault(_framptonDomUtilsIs_text);
 
-  var _diffProps = _interopRequireDefault(_framptonDomUtilsDiff_props);
+  var _propsDiff = _interopRequireDefault(_framptonDomUtilsProps_diff);
 
-  function keysMatch(oldKey, newKey) {
-    return oldKey !== undefined && newKey !== undefined && oldKey === newKey;
+  var _isSameNode = _interopRequireDefault(_framptonDomUtilsIs_same_node);
+
+  function indexesMatch(oldIndex, newIndex) {
+    return _isDefined['default'](oldIndex) && _isDefined['default'](newIndex) && oldIndex === newIndex;
   }
 
-  function isSameNode(oldNode, newNode) {
-    return oldNode.tagName === newNode.tagName && (keysMatch(oldNode.attributes.key, newNode.attributes.key) || keysMatch(oldNode.attributes.id, newNode.attributes.id));
-  }
-
-  function walk(oldNode, newNode) {
-    var newPatch, patch;
-    if (oldNode === newNode) {
+  function diffTrees(oldTree, newTree) {
+    var patch, newPatch;
+    if (oldTree === newTree) {
       return;
-    } else if (_isNothing['default'](newNode)) {
-      newPatch = _framptonDomVirtualPatch.remove(oldNode, null);
-    } else {
-      if (_isNode['default'](newNode)) {
-        if (_isNode['default'](oldNode)) {
-          if (isSameNode(oldNode, newNode)) {
-            var propsDiff = _diffProps['default'](oldNode.attributes, newNode.attributes);
-            if (_isSomething['default'](propsDiff)) {
-              newPatch = _framptonDomVirtualPatch.props(oldNode, propsDiff);
-            }
-            patch = diffChildren(oldNode, newNode, patch);
-          } else {
-            newPatch = _framptonDomVirtualPatch.replace(oldNode, newNode);
+    } else if (_isNode['default'](newTree)) {
+      if (_isNode['default'](oldTree)) {
+        if (_isSameNode['default'](oldTree, newTree)) {
+          var pDiff = _propsDiff['default'](oldTree, newTree);
+          if (_isSomething['default'](pDiff)) {
+            newPatch = _framptonDomVirtualPatch.props(null, pDiff);
           }
+          patch = diffChildren(oldTree, newTree);
         } else {
-          newPatch = _framptonDomVirtualPatch.insert(null, newNode);
+          newPatch = _framptonDomVirtualPatch.replace(oldTree, newTree);
         }
-      } else if (_isText['default'](newNode)) {
-        if (_isText['default'](oldNode)) {
-          if (oldNode.text !== newNode.text) {
-            newPatch = _framptonDomVirtualPatch.text(oldNode, newNode.text);
-          }
-        } else {
-          newPatch = _framptonDomVirtualPatch.replace(oldNode, newNode);
-        }
-      } else if (_isSomething['default'](oldNode)) {
-        newPatch = _framptonDomVirtualPatch.remove(oldNode, null);
+      } else {
+        newPatch = _framptonDomVirtualPatch.insert(null, newTree);
       }
+    } else {
+      throw new Error('Root of DOM should be a VirtualNode');
     }
 
     if (newPatch) {
@@ -156,22 +149,199 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', '
   }
 
   function diffChildren(oldNode, newNode) {
-    var patch;
+
+    // Same reference
+    if (oldNode === newNode) {
+      return;
+    }
+
     var oldChildren = oldNode.children;
     var newChildren = newNode.children;
-    var len = _max['default'](oldChildren.length, newChildren.length);
+    var nLength = newChildren.length;
+    var oLength = oldChildren.length;
+    var len = _max['default'](oLength, nLength);
+    var orderMap = [];
+    var inserts = [];
+    var newKeys = {};
+    var oldKeys = {};
+    var dirty = false;
+    var parentPatch = undefined;
+
+    // Create a map of keys to their new index
+    for (var i = 0; i < nLength; i++) {
+      var child = newChildren[i];
+      if (_isNode['default'](child)) {
+        var key = child.key;
+        if (key) {
+          newKeys[key] = i;
+        }
+      }
+    }
+
+    // Create a map of keys to their old index
+    for (var i = 0; i < oLength; i++) {
+      var child = oldChildren[i];
+      if (_isNode['default'](child)) {
+        var key = child.key;
+        if (key) {
+          oldKeys[key] = i;
+        }
+      }
+    }
 
     for (var i = 0; i < len; i++) {
       var oldChild = oldChildren[i];
       var newChild = newChildren[i];
-      var newPatch = walk(oldChild, newChild);
+      var newIndex = undefined;
+      var oldIndex = undefined;
+      var newPatch = undefined;
+      var patch = undefined;
+
+      // We have a new node
+      if (_isNode['default'](newChild)) {
+
+        // Index of new node in previous DOM
+        oldIndex = oldKeys[newChild.key];
+
+        // We have an old node
+        if (_isNode['default'](oldChild)) {
+
+          // Index of old node in new DOM
+          newIndex = newKeys[oldChild.key];
+
+          // If old and new are the same, no changes
+          if (indexesMatch(oldIndex, newIndex)) {
+            orderMap[i] = i;
+            var pDiff = _propsDiff['default'](oldChild, newChild);
+            if (_isSomething['default'](pDiff)) {
+              newPatch = _framptonDomVirtualPatch.props(null, pDiff);
+            }
+            patch = diffChildren(oldChild, newChild);
+          } else {
+
+            // Old node has no new index, delete it
+            if (_isUndefined['default'](newIndex)) {
+              dirty = true;
+              orderMap[i] = undefined;
+
+              // The index changed, we have a move
+            } else if (newIndex !== i) {
+                dirty = true;
+                orderMap[i] = newIndex;
+                var pDiff = _propsDiff['default'](oldChild, newChildren[newIndex]);
+                if (_isSomething['default'](pDiff)) {
+                  newPatch = _framptonDomVirtualPatch.props(null, pDiff);
+                }
+                patch = diffChildren(oldChild, newChildren[newIndex]);
+              }
+
+            // The new node is an insert
+            if (_isUndefined['default'](oldIndex)) {
+              inserts[i] = _framptonDomVirtualPatch.insert(null, newChild);
+            }
+          }
+
+          // We have no old node, or it is text
+        } else if (_isUndefined['default'](oldIndex)) {
+            dirty = true;
+            orderMap[i] = undefined;
+            inserts[i] = _framptonDomVirtualPatch.insert(null, newChild);
+          }
+
+        // New node is text
+      } else if (_isText['default'](newChild)) {
+
+          // Old node was text
+          if (_isText['default'](oldChild)) {
+
+            // Text nodes are the same if they have same text, duh.
+            if (oldChild.text !== newChild.text) {
+              orderMap[i] = i;
+              newPatch = _framptonDomVirtualPatch.text(oldChild, newChild.text);
+
+              // Yup, the same.
+            } else {
+                orderMap[i] = i;
+              }
+
+            // Old node was a node
+          } else if (_isNode['default'](oldChild)) {
+              dirty = true;
+              newIndex = newKeys[oldChild.key];
+
+              // Old node was deleted
+              if (_isUndefined['default'](newIndex)) {
+                orderMap[i] = undefined;
+
+                // Old node was moved
+              } else if (newIndex !== i) {
+                  orderMap[i] = newIndex;
+                  var pDiff = _propsDiff['default'](oldChild, newChildren[newIndex]);
+                  if (_isSomething['default'](pDiff)) {
+                    newPatch = _framptonDomVirtualPatch.props(null, pDiff);
+                  }
+                  patch = diffChildren(oldChild, newChildren[newIndex]);
+
+                  // Shouldn't happen
+                } else {
+                    _warn['default']('Should not get here, new node is text');
+                  }
+
+              inserts[i] = _framptonDomVirtualPatch.insert(null, newChild);
+
+              // No old node, straigh insert
+            } else {
+                inserts[i] = _framptonDomVirtualPatch.insert(null, newChild);
+              }
+
+          // If there is no new node here, index is vacant
+        } else {
+
+            // This is going to be dirty somehow
+            dirty = true;
+
+            if (_isDefined['default'](newKeys)) {
+              // Index of old node in new DOM
+              newIndex = newKeys[oldChild.key];
+
+              if (_isDefined['default'](newIndex)) {
+                dirty = true;
+                orderMap[i] = newIndex;
+                var pDiff = _propsDiff['default'](oldChild, newChildren[newIndex]);
+                if (_isSomething['default'](pDiff)) {
+                  newPatch = _framptonDomVirtualPatch.props(null, pDiff);
+                }
+                patch = diffChildren(oldChild, newChildren[newIndex]);
+              } else {
+                orderMap[i] = undefined;
+              }
+            } else {
+              orderMap[i] = undefined;
+            }
+          }
+
       if (newPatch) {
         patch = patch || [];
-        patch[i] = newPatch;
+        patch._p = newPatch;
+      }
+
+      if (patch) {
+        parentPatch = parentPatch || [];
+        parentPatch[i] = patch;
       }
     }
 
-    return patch;
+    if (dirty) {
+      parentPatch = parentPatch || [];
+      parentPatch._o = _framptonDomVirtualPatch.reorder(null, orderMap);
+    }
+
+    if (inserts.length > 0) {
+      parentPatch = parentPatch || [];
+      parentPatch._i = inserts;
+    }
+
+    return parentPatch;
   }
 
   /**
@@ -182,7 +352,7 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', '
    */
 
   function diff(oldTree, newTree) {
-    var patch = walk(oldTree, newTree) || [];
+    var patch = diffTrees(oldTree, newTree) || [];
     return [patch];
   }
 });
@@ -779,7 +949,7 @@ define("frampton-dom/ops/apply_classes", ["exports", "module"], function (export
     }
   }
 });
-define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtual/patch_types', 'frampton-dom/ops/apply_attributes', 'frampton-dom/ops/remove_node', 'frampton-dom/ops/replace_node', 'frampton-dom/ops/insert_node', 'frampton-dom/ops/update_text'], function (exports, module, _framptonDomVirtualPatch_types, _framptonDomOpsApply_attributes, _framptonDomOpsRemove_node, _framptonDomOpsReplace_node, _framptonDomOpsInsert_node, _framptonDomOpsUpdate_text) {
+define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtual/patch_types', 'frampton-dom/ops/apply_attributes', 'frampton-dom/ops/remove_node', 'frampton-dom/ops/replace_node', 'frampton-dom/ops/reorder_nodes', 'frampton-dom/ops/insert_node', 'frampton-dom/ops/update_text'], function (exports, module, _framptonDomVirtualPatch_types, _framptonDomOpsApply_attributes, _framptonDomOpsRemove_node, _framptonDomOpsReplace_node, _framptonDomOpsReorder_nodes, _framptonDomOpsInsert_node, _framptonDomOpsUpdate_text) {
   'use strict';
 
   module.exports = apply_patch;
@@ -794,6 +964,8 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
 
   var _replaceNode = _interopRequireDefault(_framptonDomOpsReplace_node);
 
+  var _reorderNodes = _interopRequireDefault(_framptonDomOpsReorder_nodes);
+
   var _insertNode = _interopRequireDefault(_framptonDomOpsInsert_node);
 
   var _updateText = _interopRequireDefault(_framptonDomOpsUpdate_text);
@@ -804,8 +976,10 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
     switch (patch.type) {
       case _PATCHES['default'].NONE:
         break;
+      case _PATCHES['default'].APPEND:
+        return _insertNode['default'](parentNode, null, update);
       case _PATCHES['default'].INSERT:
-        return _insertNode['default'](parentNode, update);
+        return _insertNode['default'](parentNode, currentNode, update);
       case _PATCHES['default'].REMOVE:
         return _removeNode['default'](currentNode);
       case _PATCHES['default'].REPLACE:
@@ -814,6 +988,8 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
         return _applyAttributes['default'](currentNode, update);
       case _PATCHES['default'].TEXT:
         return _updateText['default'](currentNode, update);
+      case _PATCHES['default'].REORDER:
+        return _reorderNodes['default'](parentNode, currentNode, update);
       default:
         throw new Error('Unrecognized patch type: ' + type);
     }
@@ -835,13 +1011,32 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
    */
 
   function apply_patch(patch, parent, current) {
+
+    // Apply patches to child nodes
     for (var key in patch) {
-      if (key === '_p') {
-        executePatch(patch[key], parent, current);
-      } else {
+      if (!isNaN(key)) {
         var child = nodeAtIndex(current, key);
         apply_patch(patch[key], current, child);
       }
+    }
+
+    // Reorder child nodes
+    if (patch._o) {
+      executePatch(patch._o, parent, current);
+    }
+
+    // Insert new nodes
+    if (patch._i) {
+      for (var key in patch._i) {
+        if (!isNaN(key)) {
+          executePatch(patch._i[key], current, nodeAtIndex(current, key));
+        }
+      }
+    }
+
+    // Patch props and text
+    if (patch._p) {
+      executePatch(patch._p, parent, current);
     }
   }
 });
@@ -944,10 +1139,14 @@ define('frampton-dom/ops/insert_node', ['exports', 'module', 'frampton-dom/ops/c
    * @param {VirtualNode} vnode
    */
 
-  function insert_node(parent, vnode) {
-    var newNode = _createElement['default'](vnode);
+  function insert_node(parent, current, update) {
+    var newNode = _createElement['default'](update);
     if (parent) {
-      parent.appendChild(newNode);
+      if (current) {
+        parent.insertBefore(newNode, current);
+      } else {
+        parent.appendChild(newNode);
+      }
     }
   }
 });
@@ -969,6 +1168,56 @@ define('frampton-dom/ops/remove_node', ['exports', 'module', 'frampton-dom/event
     if (parent) {
       _framptonDomEventsEvent_dispatcher.removeEvents(node);
       parent.removeChild(node);
+    }
+  }
+});
+define("frampton-dom/ops/reorder_nodes", ["exports", "module"], function (exports, module) {
+  /*
+   * @name reorderNodes
+   * @memberOf Frampton.DOM
+   * @method
+   * @private
+   * @param {Element} parent
+   * @param {Array} order
+   */
+  "use strict";
+
+  module.exports = reorder_nodes;
+
+  function reorder_nodes(parent, current, order) {
+
+    var children = current.childNodes;
+    var len = children.length;
+    var arr = [];
+    var map = [];
+
+    // Nodes in original order.
+    for (var i = 0; i < len; i++) {
+      arr.push(children[i]);
+    }
+
+    // Easy look up for what new indexes should be
+    for (var i = 0; i < order.length; i++) {
+      if (order[i] !== undefined) {
+        map[order[i]] = i;
+      }
+    }
+
+    for (var i = 0; i < len; i++) {
+      if (order[i] === undefined) {
+        current.removeChild(arr[i]);
+      }
+
+      var idx = map[i];
+      var ref = current.childNodes[i];
+      if (idx !== undefined) {
+        var node = arr[idx];
+        if (node && !ref) {
+          current.appendChild(node);
+        } else if (node && ref !== node) {
+          current.insertBefore(node, ref);
+        } else if (node && ref === node) {}
+      }
     }
   }
 });
@@ -1058,7 +1307,7 @@ define('frampton-dom/utils/diff_class', ['exports', 'module', 'frampton-list/len
 
     for (var i = 0; i < oLen; i++) {
       if (newClass.add.indexOf(oldClass.add[i]) === -1) {
-        diff = diff || { remove: [] };
+        diff = diff || { add: [], remove: [] };
         diff.remove = diff.remove || [];
         diff.remove.push(oldClass.add[i]);
       }
@@ -1066,7 +1315,7 @@ define('frampton-dom/utils/diff_class', ['exports', 'module', 'frampton-list/len
 
     for (var i = 0; i < nLen; i++) {
       if (oldClass.add.indexOf(newClass.add[i]) === -1) {
-        diff = diff || { add: [] };
+        diff = diff || { add: [], remove: [] };
         diff.add = diff.add || [];
         diff.add.push(newClass.add[i]);
       }
@@ -1090,14 +1339,14 @@ define('frampton-dom/utils/diff_props', ['exports', 'module', 'frampton-utils/is
 
   var _validatedTransition = _interopRequireDefault(_framptonDomUtilsValidated_transition);
 
-  function diff_props(oldObj, newObj) {
+  function diff_props(oldProps, newProps) {
 
     var diff;
 
-    for (var key in oldObj) {
+    for (var key in oldProps) {
 
-      var oldValue = oldObj[key];
-      var newValue = newObj[key];
+      var oldValue = oldProps[key];
+      var newValue = newProps[key];
 
       if (_isUndefined['default'](newValue)) {
         diff = diff || {};
@@ -1134,9 +1383,9 @@ define('frampton-dom/utils/diff_props', ['exports', 'module', 'frampton-utils/is
       }
     }
 
-    for (var key in newObj) {
-      if (_isUndefined['default'](oldObj[key])) {
-        var newValue = newObj[key];
+    for (var key in newProps) {
+      if (_isUndefined['default'](oldProps[key])) {
+        var newValue = newProps[key];
         if (key === 'class') {
           var tempDiff = _diffClass['default']('', newValue);
           if (tempDiff) {
@@ -1178,6 +1427,23 @@ define('frampton-dom/utils/is_node', ['exports', 'module', 'frampton-utils/is_ob
     return _isObject['default'](node) && node.ctor === 'VirtualNode';
   }
 });
+define('frampton-dom/utils/is_same_node', ['exports', 'module', 'frampton-utils/is_defined'], function (exports, module, _framptonUtilsIs_defined) {
+  'use strict';
+
+  module.exports = is_same_node;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _isDefined = _interopRequireDefault(_framptonUtilsIs_defined);
+
+  function keysMatch(oldKey, newKey) {
+    return _isDefined['default'](oldKey) && _isDefined['default'](newKey) && oldKey === newKey;
+  }
+
+  function is_same_node(oldNode, newNode) {
+    return _isDefined['default'](oldNode) && _isDefined['default'](newNode) && oldNode.tagName === newNode.tagName && keysMatch(oldNode.key, newNode.key);
+  }
+});
 define('frampton-dom/utils/is_text', ['exports', 'module', 'frampton-utils/is_object'], function (exports, module, _framptonUtilsIs_object) {
   'use strict';
 
@@ -1198,6 +1464,19 @@ define('frampton-dom/utils/not_empty', ['exports', 'module'], function (exports,
 
   function notEmtpy(str) {
     return str.trim() !== '';
+  }
+});
+define('frampton-dom/utils/props_diff', ['exports', 'module', 'frampton-dom/utils/diff_props'], function (exports, module, _framptonDomUtilsDiff_props) {
+  'use strict';
+
+  module.exports = props_diff;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _diffProps = _interopRequireDefault(_framptonDomUtilsDiff_props);
+
+  function props_diff(oldNode, newNode) {
+    return _diffProps['default'](oldNode.attributes, newNode.attributes);
   }
 });
 define('frampton-dom/utils/validated_class', ['exports', 'module', 'frampton-utils/is_string', 'frampton-dom/utils/not_empty', 'frampton-dom/utils/empty_class'], function (exports, module, _framptonUtilsIs_string, _framptonDomUtilsNot_empty, _framptonDomUtilsEmpty_class) {
@@ -1314,6 +1593,8 @@ define('frampton-dom/virtual/node', ['exports', 'module', 'frampton-list/length'
 
     return {
       ctor: 'VirtualNode',
+      id: attrs.id,
+      key: attrs.key || attrs.id,
       tagName: name,
       attributes: attrs,
       children: children,
@@ -1390,7 +1671,12 @@ define('frampton-dom/virtual/patch', ['exports', 'frampton-dom/virtual/patch_typ
   var text = function text(node, patch) {
     return VirtualPatch(_TYPES['default'].TEXT, node, patch);
   };
+
   exports.text = text;
+  var reorder = function reorder(node, patch) {
+    return VirtualPatch(_TYPES['default'].REORDER, node, patch);
+  };
+  exports.reorder = reorder;
 });
 define('frampton-dom/virtual/text', ['exports', 'module'], function (exports, module) {
   /**

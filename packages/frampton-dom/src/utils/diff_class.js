@@ -10,7 +10,7 @@ export default function diff_class(oldClass, newClass) {
 
   for (let i = 0; i < oLen; i++) {
     if (newClass.add.indexOf(oldClass.add[i]) === -1) {
-      diff = (diff || { remove : [] });
+      diff = (diff || { add : [], remove : [] });
       diff.remove = (diff.remove || []);
       diff.remove.push(oldClass.add[i]);
     }
@@ -18,7 +18,7 @@ export default function diff_class(oldClass, newClass) {
 
   for (let i = 0; i < nLen; i++) {
     if (oldClass.add.indexOf(newClass.add[i]) === -1) {
-      diff = (diff || { add : [] });
+      diff = (diff || { add : [], remove : [] });
       diff.add = (diff.add || []);
       diff.add.push(newClass.add[i]);
     }

@@ -42,3 +42,7 @@ export var props = (node, patch) => {
 export var text = (node, patch) => {
   return VirtualPatch(TYPES.TEXT, node, patch);
 };
+
+export var reorder = (node, patch) => {
+  return VirtualPatch(TYPES.REORDER, node, patch);
+};
