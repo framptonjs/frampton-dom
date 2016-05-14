@@ -1,6 +1,6 @@
-import diff from 'frampton-dom/utils/object_diff';
+import diff from 'frampton-dom/utils/diff_props';
 
-QUnit.module('Frampton.DOM.Utils.objectDiff');
+QUnit.module('Frampton.DOM.Utils.diffProps');
 
 QUnit.test('Should correctly diff two objects', function() {
   const oldProps = {
@@ -52,3 +52,37 @@ QUnit.test('Should correctly diff nested objects', function() {
   };
   deepEqual(diff(oldProps, newProps), expectedDiff);
 });
+
+QUnit.test('Should correctly diff transitions', function() {
+  const oldProps = {
+    transition : {
+      class : 'walk on',
+      style : {
+        background : 'black'
+      }
+    }
+  };
+  const newProps = {
+    transition : {
+      class : 'on forward',
+      style : {
+        color : 'red'
+      }
+    }
+  };
+  const expectedDiff = {
+    transition : {
+      class : {
+        add : ['forward'],
+        remove : ['walk']
+      },
+      style : {
+        background : undefined,
+        color : 'red'
+      }
+    }
+  };
+
+  deepEqual(diff(oldProps, newProps), expectedDiff);
+});
+

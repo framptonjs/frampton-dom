@@ -2,6 +2,7 @@ import getDocumentSignal from 'frampton-events/get_document_signal';
 import eventContains from 'frampton-events/contains';
 import immediate from 'frampton-utils/immediate';
 import EVENT_MAP from 'frampton-dom/events/event_map';
+import nodeGate from 'frampton-dom/events/utils/node_gate';
 
 /**
 
@@ -135,7 +136,7 @@ function addEventToNode(name, node) {
     });
   } else {
     if (entry[0].events.indexOf(name) === -1) {
-      entry.events.push(name);
+      entry[0].events.push(name);
     }
   }
 }
@@ -155,6 +156,10 @@ export function addEvent(name, node, handler) {
     }
 
     const entry = getEntry(events.nodes, node);
+
+    if (name === 'transitionend') {
+      handler = nodeGate(node, handler);
+    }
 
     if (!entry) {
       events.nodes.push({

@@ -86,7 +86,7 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
   _Frampton['default'].DOM.Html.source = _framptonDomHtmlDom.source;
   _Frampton['default'].DOM.Html.figcaption = _framptonDomHtmlDom.figcaption;
 });
-define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_something', 'frampton-math/max', 'frampton-dom/virtual/patch', 'frampton-dom/utils/is_node', 'frampton-dom/utils/is_text', 'frampton-dom/utils/object_diff'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_something, _framptonMathMax, _framptonDomVirtualPatch, _framptonDomUtilsIs_node, _framptonDomUtilsIs_text, _framptonDomUtilsObject_diff) {
+define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_something', 'frampton-math/max', 'frampton-dom/virtual/patch', 'frampton-dom/utils/is_node', 'frampton-dom/utils/is_text', 'frampton-dom/utils/diff_props'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_something, _framptonMathMax, _framptonDomVirtualPatch, _framptonDomUtilsIs_node, _framptonDomUtilsIs_text, _framptonDomUtilsDiff_props) {
   'use strict';
 
   module.exports = diff;
@@ -103,7 +103,7 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', '
 
   var _isText = _interopRequireDefault(_framptonDomUtilsIs_text);
 
-  var _objectDiff = _interopRequireDefault(_framptonDomUtilsObject_diff);
+  var _diffProps = _interopRequireDefault(_framptonDomUtilsDiff_props);
 
   function keysMatch(oldKey, newKey) {
     return oldKey !== undefined && newKey !== undefined && oldKey === newKey;
@@ -123,7 +123,7 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', '
       if (_isNode['default'](newNode)) {
         if (_isNode['default'](oldNode)) {
           if (isSameNode(oldNode, newNode)) {
-            var propsDiff = _objectDiff['default'](oldNode.attributes, newNode.attributes);
+            var propsDiff = _diffProps['default'](oldNode.attributes, newNode.attributes);
             if (_isSomething['default'](propsDiff)) {
               newPatch = _framptonDomVirtualPatch.props(oldNode, propsDiff);
             }
@@ -186,7 +186,7 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_nothing', '
     return [patch];
   }
 });
-define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-events/get_document_signal', 'frampton-events/contains', 'frampton-utils/immediate', 'frampton-dom/events/event_map'], function (exports, _framptonEventsGet_document_signal, _framptonEventsContains, _framptonUtilsImmediate, _framptonDomEventsEvent_map) {
+define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-events/get_document_signal', 'frampton-events/contains', 'frampton-utils/immediate', 'frampton-dom/events/event_map', 'frampton-dom/events/utils/node_gate'], function (exports, _framptonEventsGet_document_signal, _framptonEventsContains, _framptonUtilsImmediate, _framptonDomEventsEvent_map, _framptonDomEventsUtilsNode_gate) {
   'use strict';
 
   exports.__esModule = true;
@@ -203,6 +203,8 @@ define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-events/get_
   var _immediate = _interopRequireDefault(_framptonUtilsImmediate);
 
   var _EVENT_MAP = _interopRequireDefault(_framptonDomEventsEvent_map);
+
+  var _nodeGate = _interopRequireDefault(_framptonDomEventsUtilsNode_gate);
 
   /**
   
@@ -333,7 +335,7 @@ define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-events/get_
       });
     } else {
       if (entry[0].events.indexOf(name) === -1) {
-        entry.events.push(name);
+        entry[0].events.push(name);
       }
     }
   }
@@ -353,6 +355,10 @@ define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-events/get_
       }
 
       var entry = getEntry(events.nodes, node);
+
+      if (name === 'transitionend') {
+        handler = _nodeGate['default'](node, handler);
+      }
 
       if (!entry) {
         events.nodes.push({
@@ -449,6 +455,22 @@ define('frampton-dom/events/utils/is_event', ['exports', 'module', 'frampton-uti
 
   function is_event(name) {
     return _isSomething['default'](_EVENT_MAP['default'][name]);
+  }
+});
+define("frampton-dom/events/utils/node_gate", ["exports", "module"], function (exports, module) {
+  /**
+   *  Only allow an event through if it's target is the given node
+   */
+  "use strict";
+
+  module.exports = node_gate;
+
+  function node_gate(node, fn) {
+    return function (evt) {
+      if (evt.target === node) {
+        fn(evt);
+      }
+    };
   }
 });
 define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampton-dom/virtual/text'], function (exports, _framptonDomVirtualNode, _framptonDomVirtualText) {
@@ -678,7 +700,7 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
   exports.em = em;
 });
-define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-style/apply_styles', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/event_dispatcher'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_object, _framptonUtilsWarn, _framptonStyleApply_styles, _framptonDomEventsUtilsIs_event, _framptonDomEventsEvent_dispatcher) {
+define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-style/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/event_dispatcher'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_object, _framptonUtilsWarn, _framptonStyleApply_styles, _framptonDomOpsApply_classes, _framptonDomUtilsValidated_class, _framptonDomUtilsValidated_transition, _framptonDomOpsApply_transition, _framptonDomEventsUtilsIs_event, _framptonDomEventsEvent_dispatcher) {
   'use strict';
 
   module.exports = apply_attributes;
@@ -692,6 +714,14 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-util
   var _warn = _interopRequireDefault(_framptonUtilsWarn);
 
   var _applyStyles = _interopRequireDefault(_framptonStyleApply_styles);
+
+  var _applyClasses = _interopRequireDefault(_framptonDomOpsApply_classes);
+
+  var _validatedClass = _interopRequireDefault(_framptonDomUtilsValidated_class);
+
+  var _validatedTransition = _interopRequireDefault(_framptonDomUtilsValidated_transition);
+
+  var _applyTransition = _interopRequireDefault(_framptonDomOpsApply_transition);
 
   var _isEvent = _interopRequireDefault(_framptonDomEventsUtilsIs_event);
 
@@ -717,12 +747,35 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-util
           } else {
             _warn['default']('Style attribute is not an object');
           }
+        } else if (_name === 'transition') {
+          _applyTransition['default'](node, _validatedTransition['default'](value));
+        } else if (_name === 'class') {
+          _applyClasses['default'](node, _validatedClass['default'](value));
         } else if (_isEvent['default'](_name)) {
           _framptonDomEventsEvent_dispatcher.addEvent(_name, node, value);
         } else if (_name !== 'key') {
           node.setAttribute(_name, value);
         }
       }
+    }
+  }
+});
+define("frampton-dom/ops/apply_classes", ["exports", "module"], function (exports, module) {
+  "use strict";
+
+  module.exports = apply_classes;
+
+  function apply_classes(node, diff) {
+    if (diff.remove && diff.remove.length > 0) {
+      var _node$classList;
+
+      (_node$classList = node.classList).remove.apply(_node$classList, diff.remove);
+    }
+
+    if (diff.add && diff.add.length > 0) {
+      var _node$classList2;
+
+      (_node$classList2 = node.classList).add.apply(_node$classList2, diff.add);
     }
   }
 });
@@ -790,6 +843,42 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
         apply_patch(patch[key], current, child);
       }
     }
+  }
+});
+define('frampton-dom/ops/apply_transition', ['exports', 'module', 'frampton-style/apply_styles', 'frampton-motion/reflow', 'frampton-motion/normalized_frame', 'frampton-utils/immediate', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class'], function (exports, module, _framptonStyleApply_styles, _framptonMotionReflow, _framptonMotionNormalized_frame, _framptonUtilsImmediate, _framptonDomOpsApply_classes, _framptonDomUtilsValidated_class) {
+  'use strict';
+
+  module.exports = apply_transition;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _applyStyles = _interopRequireDefault(_framptonStyleApply_styles);
+
+  var _reflow = _interopRequireDefault(_framptonMotionReflow);
+
+  var _normalizedFrame = _interopRequireDefault(_framptonMotionNormalized_frame);
+
+  var _immediate = _interopRequireDefault(_framptonUtilsImmediate);
+
+  var _applyClasses = _interopRequireDefault(_framptonDomOpsApply_classes);
+
+  var _validatedClass = _interopRequireDefault(_framptonDomUtilsValidated_class);
+
+  /**
+   * @name applyTransition
+   * @param {Element} node Dom element to apply transition to
+   * @param {Object} desc An object describing the transition to make
+   */
+
+  function apply_transition(node, desc) {
+    _immediate['default'](function () {
+      var endClasses = _validatedClass['default'](desc['class']);
+      var endFrame = _normalizedFrame['default'](desc.style || {});
+      // Force a reflow to make sure we're in a good state
+      _reflow['default'](node);
+      _applyClasses['default'](node, endClasses);
+      _applyStyles['default'](node, endFrame);
+    });
   }
 });
 define('frampton-dom/ops/create_element', ['exports', 'module', 'frampton-dom/utils/is_text', 'frampton-dom/ops/apply_attributes'], function (exports, module, _framptonDomUtilsIs_text, _framptonDomOpsApply_attributes) {
@@ -949,6 +1038,133 @@ define('frampton-dom/update', ['exports', 'module', 'frampton-dom/diff', 'frampt
     _applyPatch['default'](patch, rootNode, rootNode);
   }
 });
+define('frampton-dom/utils/diff_class', ['exports', 'module', 'frampton-list/length', 'frampton-dom/utils/validated_class'], function (exports, module, _framptonListLength, _framptonDomUtilsValidated_class) {
+  'use strict';
+
+  module.exports = diff_class;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _length = _interopRequireDefault(_framptonListLength);
+
+  var _validatedClass = _interopRequireDefault(_framptonDomUtilsValidated_class);
+
+  function diff_class(oldClass, newClass) {
+    oldClass = _validatedClass['default'](oldClass);
+    newClass = _validatedClass['default'](newClass);
+    var oLen = _length['default'](oldClass.add);
+    var nLen = _length['default'](newClass.add);
+    var diff;
+
+    for (var i = 0; i < oLen; i++) {
+      if (newClass.add.indexOf(oldClass.add[i]) === -1) {
+        diff = diff || { remove: [] };
+        diff.remove = diff.remove || [];
+        diff.remove.push(oldClass.add[i]);
+      }
+    }
+
+    for (var i = 0; i < nLen; i++) {
+      if (oldClass.add.indexOf(newClass.add[i]) === -1) {
+        diff = diff || { add: [] };
+        diff.add = diff.add || [];
+        diff.add.push(newClass.add[i]);
+      }
+    }
+
+    return diff;
+  }
+});
+define('frampton-dom/utils/diff_props', ['exports', 'module', 'frampton-utils/is_object', 'frampton-utils/is_undefined', 'frampton-dom/utils/diff_class', 'frampton-dom/utils/validated_transition'], function (exports, module, _framptonUtilsIs_object, _framptonUtilsIs_undefined, _framptonDomUtilsDiff_class, _framptonDomUtilsValidated_transition) {
+  'use strict';
+
+  module.exports = diff_props;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _isObject = _interopRequireDefault(_framptonUtilsIs_object);
+
+  var _isUndefined = _interopRequireDefault(_framptonUtilsIs_undefined);
+
+  var _diffClass = _interopRequireDefault(_framptonDomUtilsDiff_class);
+
+  var _validatedTransition = _interopRequireDefault(_framptonDomUtilsValidated_transition);
+
+  function diff_props(oldObj, newObj) {
+
+    var diff;
+
+    for (var key in oldObj) {
+
+      var oldValue = oldObj[key];
+      var newValue = newObj[key];
+
+      if (_isUndefined['default'](newValue)) {
+        diff = diff || {};
+        diff[key] = undefined;
+      }
+
+      if (key === 'style') {
+        newValue = newValue || {};
+      }
+
+      if (key === 'transition') {
+        newValue = _validatedTransition['default'](newValue);
+        var tempDiff = diff_props(oldValue, newValue);
+        if (tempDiff) {
+          diff = diff || {};
+          diff[key] = tempDiff;
+        }
+      } else if (key === 'class') {
+        newValue = newValue || '';
+        var tempDiff = _diffClass['default'](oldValue, newValue);
+        if (tempDiff) {
+          diff = diff || {};
+          diff[key] = tempDiff;
+        }
+      } else if (_isObject['default'](oldValue) && _isObject['default'](newValue)) {
+        var tempDiff = diff_props(oldValue, newValue);
+        if (tempDiff) {
+          diff = diff || {};
+          diff[key] = tempDiff;
+        }
+      } else if (oldValue !== newValue) {
+        diff = diff || {};
+        diff[key] = newValue;
+      }
+    }
+
+    for (var key in newObj) {
+      if (_isUndefined['default'](oldObj[key])) {
+        var newValue = newObj[key];
+        if (key === 'class') {
+          var tempDiff = _diffClass['default']('', newValue);
+          if (tempDiff) {
+            diff = diff || {};
+            diff[key] = tempDiff;
+          }
+        } else {
+          diff = diff || {};
+          diff[key] = newValue;
+        }
+      }
+    }
+
+    return diff;
+  }
+});
+define("frampton-dom/utils/empty_class", ["exports", "module"], function (exports, module) {
+  "use strict";
+
+  module.exports = empty_class;
+
+  function empty_class() {
+    return {
+      add: [],
+      remove: []
+    };
+  }
+});
 define('frampton-dom/utils/is_node', ['exports', 'module', 'frampton-utils/is_object'], function (exports, module, _framptonUtilsIs_object) {
   'use strict';
 
@@ -975,49 +1191,83 @@ define('frampton-dom/utils/is_text', ['exports', 'module', 'frampton-utils/is_ob
     return _isObject['default'](node) && node.ctor === 'VirtualText';
   }
 });
-define('frampton-dom/utils/object_diff', ['exports', 'module', 'frampton-utils/is_object'], function (exports, module, _framptonUtilsIs_object) {
+define('frampton-dom/utils/not_empty', ['exports', 'module'], function (exports, module) {
   'use strict';
 
-  module.exports = object_diff;
+  module.exports = notEmtpy;
+
+  function notEmtpy(str) {
+    return str.trim() !== '';
+  }
+});
+define('frampton-dom/utils/validated_class', ['exports', 'module', 'frampton-utils/is_string', 'frampton-dom/utils/not_empty', 'frampton-dom/utils/empty_class'], function (exports, module, _framptonUtilsIs_string, _framptonDomUtilsNot_empty, _framptonDomUtilsEmpty_class) {
+  'use strict';
+
+  module.exports = validated_class;
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-  var _isObject = _interopRequireDefault(_framptonUtilsIs_object);
+  var _isString = _interopRequireDefault(_framptonUtilsIs_string);
 
-  function object_diff(oldObj, newObj) {
+  var _notEmpty = _interopRequireDefault(_framptonDomUtilsNot_empty);
 
-    var diff;
+  var _emptyClass = _interopRequireDefault(_framptonDomUtilsEmpty_class);
 
-    for (var key in oldObj) {
+  function validated_class(str) {
 
-      var oldValue = oldObj[key];
-      var newValue = newObj[key];
-
-      if (!newValue) {
-        diff = diff || {};
-        diff[key] = undefined;
-      }
-
-      if (_isObject['default'](oldValue) && _isObject['default'](newValue)) {
-        var tempDiff = object_diff(oldValue, newValue);
-        if (tempDiff) {
-          diff = diff || {};
-          diff[key] = object_diff(oldValue, newValue);
-        }
-      } else if (oldValue !== newValue) {
-        diff = diff || {};
-        diff[key] = newValue;
-      }
+    if (!str) {
+      return _emptyClass['default']();
     }
 
-    for (var key in newObj) {
-      if (!oldObj[key]) {
-        diff = diff || {};
-        diff[key] = newObj[key];
-      }
+    if (_isString['default'](str)) {
+      return {
+        add: str.split(' ').filter(_notEmpty['default']),
+        remove: []
+      };
     }
 
-    return diff;
+    if (!str.add) {
+      str.add = [];
+    }
+
+    if (!str.remove) {
+      str.remove = [];
+    }
+
+    return str;
+  }
+});
+define('frampton-dom/utils/validated_transition', ['exports', 'module', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/empty_class'], function (exports, module, _framptonDomUtilsValidated_class, _framptonDomUtilsEmpty_class) {
+  'use strict';
+
+  module.exports = validated_transition;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _validatedClass = _interopRequireDefault(_framptonDomUtilsValidated_class);
+
+  var _emptyClass = _interopRequireDefault(_framptonDomUtilsEmpty_class);
+
+  function validated_transition(desc) {
+
+    if (!desc) {
+      return {
+        'class': _emptyClass['default'](),
+        style: {}
+      };
+    }
+
+    if (!desc['class']) {
+      desc['class'] = _emptyClass['default']();
+    } else {
+      desc['class'] = _validatedClass['default'](desc['class']);
+    }
+
+    if (!desc.style) {
+      desc.style = {};
+    }
+
+    return desc;
   }
 });
 define('frampton-dom/virtual/node', ['exports', 'module', 'frampton-list/length', 'frampton-utils/is_array', 'frampton-utils/is_object', 'frampton-utils/is_string'], function (exports, module, _framptonListLength, _framptonUtilsIs_array, _framptonUtilsIs_object, _framptonUtilsIs_string) {

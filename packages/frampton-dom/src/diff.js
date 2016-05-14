@@ -10,7 +10,7 @@ import {
 } from 'frampton-dom/virtual/patch';
 import isNode from 'frampton-dom/utils/is_node';
 import isText from 'frampton-dom/utils/is_text';
-import objectDiff from 'frampton-dom/utils/object_diff';
+import diffProps from 'frampton-dom/utils/diff_props';
 
 function keysMatch(oldKey, newKey) {
   return (
@@ -40,7 +40,7 @@ function walk(oldNode, newNode) {
     if (isNode(newNode)) {
       if (isNode(oldNode)) {
         if (isSameNode(oldNode, newNode)) {
-          const propsDiff = objectDiff(oldNode.attributes, newNode.attributes);
+          const propsDiff = diffProps(oldNode.attributes, newNode.attributes);
           if (isSomething(propsDiff)) {
             newPatch = props(oldNode, propsDiff);
           }
