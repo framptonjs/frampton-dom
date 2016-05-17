@@ -1,4 +1,5 @@
 import length from 'frampton-list/length';
+import isDefined from 'frampton-utils/is_defined';
 import isArray from 'frampton-utils/is_array';
 import isObject from 'frampton-utils/is_object';
 import isString from 'frampton-utils/is_string';
@@ -30,7 +31,7 @@ export default function VirtualNode(name, attrs, children) {
   return {
     ctor : 'VirtualNode',
     id : attrs.id,
-    key : (attrs.key || attrs.id),
+    key : (isDefined(attrs.key) ? attrs.key : attrs.id),
     tagName : name,
     attributes : attrs,
     children : children,

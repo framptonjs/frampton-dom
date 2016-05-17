@@ -1546,7 +1546,7 @@ define('frampton-dom/utils/validated_transition', ['exports', 'module', 'frampto
     return desc;
   }
 });
-define('frampton-dom/virtual/node', ['exports', 'module', 'frampton-list/length', 'frampton-utils/is_array', 'frampton-utils/is_object', 'frampton-utils/is_string'], function (exports, module, _framptonListLength, _framptonUtilsIs_array, _framptonUtilsIs_object, _framptonUtilsIs_string) {
+define('frampton-dom/virtual/node', ['exports', 'module', 'frampton-list/length', 'frampton-utils/is_defined', 'frampton-utils/is_array', 'frampton-utils/is_object', 'frampton-utils/is_string'], function (exports, module, _framptonListLength, _framptonUtilsIs_defined, _framptonUtilsIs_array, _framptonUtilsIs_object, _framptonUtilsIs_string) {
   'use strict';
 
   module.exports = VirtualNode;
@@ -1554,6 +1554,8 @@ define('frampton-dom/virtual/node', ['exports', 'module', 'frampton-list/length'
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
   var _length = _interopRequireDefault(_framptonListLength);
+
+  var _isDefined = _interopRequireDefault(_framptonUtilsIs_defined);
 
   var _isArray = _interopRequireDefault(_framptonUtilsIs_array);
 
@@ -1591,7 +1593,7 @@ define('frampton-dom/virtual/node', ['exports', 'module', 'frampton-list/length'
     return {
       ctor: 'VirtualNode',
       id: attrs.id,
-      key: attrs.key || attrs.id,
+      key: _isDefined['default'](attrs.key) ? attrs.key : attrs.id,
       tagName: name,
       attributes: attrs,
       children: children,
