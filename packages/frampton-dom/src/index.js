@@ -2,7 +2,6 @@ import Frampton from 'frampton/namespace';
 
 import diff from 'frampton-dom/diff';
 import update from 'frampton-dom/update';
-import propsDiff from 'frampton-dom/utils/diff_props';
 
 import {
   node, text,
@@ -23,10 +22,9 @@ import {
  * @memberof Frampton
  */
 Frampton.DOM         = {};
-Frampton.DOM.VERSION = '0.0.2';
+Frampton.DOM.VERSION = '0.0.3';
 Frampton.DOM.diff    = diff;
 Frampton.DOM.update  = update;
-Frampton.DOM.props = propsDiff;
 
 /**
  * @name Html

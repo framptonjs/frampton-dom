@@ -13,7 +13,7 @@ var global = this;
   require = Frampton.__loader.require;
 
 }());
-define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'frampton-dom/update', 'frampton-dom/utils/diff_props', 'frampton-dom/html/dom'], function (exports, _framptonNamespace, _framptonDomDiff, _framptonDomUpdate, _framptonDomUtilsDiff_props, _framptonDomHtmlDom) {
+define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'frampton-dom/update', 'frampton-dom/html/dom'], function (exports, _framptonNamespace, _framptonDomDiff, _framptonDomUpdate, _framptonDomHtmlDom) {
   'use strict';
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -24,18 +24,15 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
 
   var _update = _interopRequireDefault(_framptonDomUpdate);
 
-  var _propsDiff = _interopRequireDefault(_framptonDomUtilsDiff_props);
-
   /**
    * @name DOM
    * @namespace
    * @memberof Frampton
    */
   _Frampton['default'].DOM = {};
-  _Frampton['default'].DOM.VERSION = '0.0.2';
+  _Frampton['default'].DOM.VERSION = '0.0.3';
   _Frampton['default'].DOM.diff = _diff['default'];
   _Frampton['default'].DOM.update = _update['default'];
-  _Frampton['default'].DOM.props = _propsDiff['default'];
 
   /**
    * @name Html
