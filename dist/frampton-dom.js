@@ -43,20 +43,33 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
   // PRIMITIVES
   _Frampton['default'].DOM.Html.node = _framptonDomHtmlDom.node;
   _Frampton['default'].DOM.Html.text = _framptonDomHtmlDom.text;
-  // MAIN
+  // BASICS
   _Frampton['default'].DOM.Html.div = _framptonDomHtmlDom.div;
   _Frampton['default'].DOM.Html.span = _framptonDomHtmlDom.span;
   _Frampton['default'].DOM.Html.p = _framptonDomHtmlDom.p;
+  _Frampton['default'].DOM.Html.a = _framptonDomHtmlDom.a;
+  // SEMANTIC
   _Frampton['default'].DOM.Html.header = _framptonDomHtmlDom.header;
   _Frampton['default'].DOM.Html.footer = _framptonDomHtmlDom.footer;
   _Frampton['default'].DOM.Html.article = _framptonDomHtmlDom.article;
   _Frampton['default'].DOM.Html.section = _framptonDomHtmlDom.section;
   _Frampton['default'].DOM.Html.aside = _framptonDomHtmlDom.aside;
   _Frampton['default'].DOM.Html.main = _framptonDomHtmlDom.main;
+  _Frampton['default'].DOM.Html.nav = _framptonDomHtmlDom.nav;
+  _Frampton['default'].DOM.Html.menu = _framptonDomHtmlDom.menu;
+  _Frampton['default'].DOM.Html.menuitem = _framptonDomHtmlDom.menuitem;
+  _Frampton['default'].DOM.Html.address = _framptonDomHtmlDom.address;
+  _Frampton['default'].DOM.Html.summary = _framptonDomHtmlDom.summary;
+  _Frampton['default'].DOM.Html.details = _framptonDomHtmlDom.details;
+  _Frampton['default'].DOM.Html.progress = _framptonDomHtmlDom.progress;
   // LISTS
   _Frampton['default'].DOM.Html.ul = _framptonDomHtmlDom.ul;
   _Frampton['default'].DOM.Html.ol = _framptonDomHtmlDom.ol;
   _Frampton['default'].DOM.Html.li = _framptonDomHtmlDom.li;
+  // DESCRIPTION LISTS
+  _Frampton['default'].DOM.Html.dl = _framptonDomHtmlDom.dl;
+  _Frampton['default'].DOM.Html.dt = _framptonDomHtmlDom.dt;
+  _Frampton['default'].DOM.Html.dd = _framptonDomHtmlDom.dd;
   // HEADINGS
   _Frampton['default'].DOM.Html.h1 = _framptonDomHtmlDom.h1;
   _Frampton['default'].DOM.Html.h2 = _framptonDomHtmlDom.h2;
@@ -68,7 +81,7 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
   _Frampton['default'].DOM.Html.strong = _framptonDomHtmlDom.strong;
   _Frampton['default'].DOM.Html.em = _framptonDomHtmlDom.em;
   _Frampton['default'].DOM.Html.pre = _framptonDomHtmlDom.pre;
-  _Frampton['default'].DOM.Html.a = _framptonDomHtmlDom.a;
+  _Frampton['default'].DOM.Html.code = _framptonDomHtmlDom.code;
   // FORMS
   _Frampton['default'].DOM.Html.legend = _framptonDomHtmlDom.legend;
   _Frampton['default'].DOM.Html.fieldset = _framptonDomHtmlDom.fieldset;
@@ -85,6 +98,16 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
   _Frampton['default'].DOM.Html.audio = _framptonDomHtmlDom.audio;
   _Frampton['default'].DOM.Html.source = _framptonDomHtmlDom.source;
   _Frampton['default'].DOM.Html.figcaption = _framptonDomHtmlDom.figcaption;
+  // TABLES
+  _Frampton['default'].DOM.Html.table = _framptonDomHtmlDom.table;
+  _Frampton['default'].DOM.Html.thead = _framptonDomHtmlDom.thead;
+  _Frampton['default'].DOM.Html.tbody = _framptonDomHtmlDom.tbody;
+  _Frampton['default'].DOM.Html.tfoot = _framptonDomHtmlDom.tfoot;
+  _Frampton['default'].DOM.Html.tr = _framptonDomHtmlDom.tr;
+  _Frampton['default'].DOM.Html.td = _framptonDomHtmlDom.td;
+  _Frampton['default'].DOM.Html.col = _framptonDomHtmlDom.col;
+  _Frampton['default'].DOM.Html.colgroup = _framptonDomHtmlDom.colgroup;
+  _Frampton['default'].DOM.Html.caption = _framptonDomHtmlDom.caption;
 });
 define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_defined', 'frampton-utils/is_undefined', 'frampton-utils/is_something', 'frampton-utils/warn', 'frampton-math/max', 'frampton-dom/virtual/patch', 'frampton-dom/utils/is_node', 'frampton-dom/utils/is_text', 'frampton-dom/utils/props_diff', 'frampton-dom/utils/is_same_node'], function (exports, module, _framptonUtilsIs_defined, _framptonUtilsIs_undefined, _framptonUtilsIs_something, _framptonUtilsWarn, _framptonMathMax, _framptonDomVirtualPatch, _framptonDomUtilsIs_node, _framptonDomUtilsIs_text, _framptonDomUtilsProps_diff, _framptonDomUtilsIs_same_node) {
   'use strict';
@@ -681,7 +704,7 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
 
   exports.text = text;
-  // MAIN TAGS
+  // BASIC TAGS
 
   var div = function div(attrs, children) {
     return _vnode['default']('div', attrs, children);
@@ -693,6 +716,18 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
 
   exports.span = span;
+  var p = function p(attrs, children) {
+    return _vnode['default']('p', attrs, children);
+  };
+
+  exports.p = p;
+  var a = function a(attrs, children) {
+    return _vnode['default']('a', attrs, children);
+  };
+
+  exports.a = a;
+  // SEMANTIC
+
   var header = function header(attrs, children) {
     return _vnode['default']('header', attrs, children);
   };
@@ -723,16 +758,41 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
 
   exports.main = main;
-  var p = function p(attrs, children) {
-    return _vnode['default']('p', attrs, children);
+  var nav = function nav(attrs, children) {
+    return _vnode['default']('nav', attrs, children);
   };
 
-  exports.p = p;
-  var a = function a(attrs, children) {
-    return _vnode['default']('a', attrs, children);
+  exports.nav = nav;
+  var menu = function menu(attrs, children) {
+    return _vnode['default']('menu', attrs, children);
   };
 
-  exports.a = a;
+  exports.menu = menu;
+  var menuitem = function menuitem(attrs, children) {
+    return _vnode['default']('menuitem', attrs, children);
+  };
+
+  exports.menuitem = menuitem;
+  var address = function address(attrs, children) {
+    return _vnode['default']('address', attrs, children);
+  };
+
+  exports.address = address;
+  var summary = function summary(attrs, children) {
+    return _vnode['default']('summary', attrs, children);
+  };
+
+  exports.summary = summary;
+  var details = function details(attrs, children) {
+    return _vnode['default']('details', attrs, children);
+  };
+
+  exports.details = details;
+  var progress = function progress(attrs, children) {
+    return _vnode['default']('progress', attrs, children);
+  };
+
+  exports.progress = progress;
   // HEADINGS
 
   var h1 = function h1(attrs, children) {
@@ -782,6 +842,23 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
 
   exports.li = li;
+  // DESCRIPTION LISTS
+
+  var dl = function dl(attrs, children) {
+    return _vnode['default']('dl', attrs, children);
+  };
+
+  exports.dl = dl;
+  var dt = function dt(attrs, children) {
+    return _vnode['default']('dt', attrs, children);
+  };
+
+  exports.dt = dt;
+  var dd = function dd(attrs, children) {
+    return _vnode['default']('dd', attrs, children);
+  };
+
+  exports.dd = dd;
   // MEDIA
 
   var img = function img(attrs, children) {
@@ -861,11 +938,6 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
 
   exports.textarea = textarea;
-  var caption = function caption(attrs, children) {
-    return _vnode['default']('caption', attrs, children);
-  };
-
-  exports.caption = caption;
   // FORMATTING
 
   var pre = function pre(attrs, children) {
@@ -873,6 +945,11 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
 
   exports.pre = pre;
+  var code = function code(attrs, children) {
+    return _vnode['default']('code', attrs, children);
+  };
+
+  exports.code = code;
   var strong = function strong(attrs, children) {
     return _vnode['default']('strong', attrs, children);
   };
@@ -881,7 +958,59 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   var em = function em(attrs, children) {
     return _vnode['default']('em', attrs, children);
   };
+
   exports.em = em;
+  // TABLES
+
+  var table = function table(attrs, children) {
+    return _vnode['default']('table', attrs, children);
+  };
+
+  exports.table = table;
+  var caption = function caption(attrs, children) {
+    return _vnode['default']('caption', attrs, children);
+  };
+
+  exports.caption = caption;
+  var tbody = function tbody(attrs, children) {
+    return _vnode['default']('tbody', attrs, children);
+  };
+
+  exports.tbody = tbody;
+  var thead = function thead(attrs, children) {
+    return _vnode['default']('thead', attrs, children);
+  };
+
+  exports.thead = thead;
+  var tfoot = function tfoot(attrs, children) {
+    return _vnode['default']('tfoot', attrs, children);
+  };
+
+  exports.tfoot = tfoot;
+  var col = function col(attrs, children) {
+    return _vnode['default']('col', attrs, children);
+  };
+
+  exports.col = col;
+  var colgroup = function colgroup(attrs, children) {
+    return _vnode['default']('colgroup', attrs, children);
+  };
+
+  exports.colgroup = colgroup;
+  var th = function th(attrs, children) {
+    return _vnode['default']('th', attrs, children);
+  };
+
+  exports.th = th;
+  var tr = function tr(attrs, children) {
+    return _vnode['default']('tr', attrs, children);
+  };
+
+  exports.tr = tr;
+  var td = function td(attrs, children) {
+    return _vnode['default']('td', attrs, children);
+  };
+  exports.td = td;
 });
 define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-list/contains', 'frampton-style/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/event_dispatcher'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_object, _framptonUtilsWarn, _framptonListContains, _framptonStyleApply_styles, _framptonDomOpsApply_classes, _framptonDomUtilsValidated_class, _framptonDomUtilsValidated_transition, _framptonDomOpsApply_transition, _framptonDomEventsUtilsIs_event, _framptonDomEventsEvent_dispatcher) {
   'use strict';

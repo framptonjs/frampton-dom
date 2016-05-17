@@ -16,7 +16,7 @@ export const text = (value) => {
 };
 
 
-// MAIN TAGS
+// BASIC TAGS
 
 export const div = (attrs, children) => {
   return vnode('div', attrs, children);
@@ -25,6 +25,17 @@ export const div = (attrs, children) => {
 export const span = (attrs, children) => {
   return vnode('span', attrs, children);
 };
+
+export const p = (attrs, children) => {
+  return vnode('p', attrs, children);
+};
+
+export const a = (attrs, children) => {
+  return vnode('a', attrs, children);
+};
+
+
+// SEMANTIC
 
 export const header = (attrs, children) => {
   return vnode('header', attrs, children);
@@ -50,12 +61,32 @@ export const main = (attrs, children) => {
   return vnode('main', attrs, children);
 };
 
-export const p = (attrs, children) => {
-  return vnode('p', attrs, children);
+export const nav = (attrs, children) => {
+  return vnode('nav', attrs, children);
 };
 
-export const a = (attrs, children) => {
-  return vnode('a', attrs, children);
+export const menu = (attrs, children) => {
+  return vnode('menu', attrs, children);
+};
+
+export const menuitem = (attrs, children) => {
+  return vnode('menuitem', attrs, children);
+};
+
+export const address = (attrs, children) => {
+  return vnode('address', attrs, children);
+};
+
+export const summary = (attrs, children) => {
+  return vnode('summary', attrs, children);
+};
+
+export const details = (attrs, children) => {
+  return vnode('details', attrs, children);
+};
+
+export const progress = (attrs, children) => {
+  return vnode('progress', attrs, children);
 };
 
 
@@ -98,6 +129,21 @@ export const ol = (attrs, children) => {
 
 export const li = (attrs, children) => {
   return vnode('li', attrs, children);
+};
+
+
+// DESCRIPTION LISTS
+
+export const dl = (attrs, children) => {
+  return vnode('dl', attrs, children);
+};
+
+export const dt = (attrs, children) => {
+  return vnode('dt', attrs, children);
+};
+
+export const dd = (attrs, children) => {
+  return vnode('dd', attrs, children);
 };
 
 
@@ -167,15 +213,15 @@ export const textarea = (attrs, children) => {
   return vnode('textarea', attrs, children);
 };
 
-export const caption = (attrs, children) => {
-  return vnode('caption', attrs, children);
-};
-
 
 // FORMATTING
 
 export const pre = (attrs, children) => {
   return vnode('pre', attrs, children);
+};
+
+export const code = (attrs, children) => {
+  return vnode('code', attrs, children);
 };
 
 export const strong = (attrs, children) => {
@@ -184,4 +230,47 @@ export const strong = (attrs, children) => {
 
 export const em = (attrs, children) => {
   return vnode('em', attrs, children);
+};
+
+
+// TABLES
+
+export const table = (attrs, children) => {
+  return vnode('table', attrs, children);
+};
+
+export const caption = (attrs, children) => {
+  return vnode('caption', attrs, children);
+};
+
+export const tbody = (attrs, children) => {
+  return vnode('tbody', attrs, children);
+};
+
+export const thead = (attrs, children) => {
+  return vnode('thead', attrs, children);
+};
+
+export const tfoot = (attrs, children) => {
+  return vnode('tfoot', attrs, children);
+};
+
+export const col = (attrs, children) => {
+  return vnode('col', attrs, children);
+};
+
+export const colgroup = (attrs, children) => {
+  return vnode('colgroup', attrs, children);
+};
+
+export const th = (attrs, children) => {
+  return vnode('th', attrs, children);
+};
+
+export const tr = (attrs, children) => {
+  return vnode('tr', attrs, children);
+};
+
+export const td = (attrs, children) => {
+  return vnode('td', attrs, children);
 };

@@ -2,19 +2,23 @@ import Frampton from 'frampton/namespace';
 
 import diff from 'frampton-dom/diff';
 import update from 'frampton-dom/update';
-import props from 'frampton-dom/utils/diff_props';
 
 import {
   node, text,
   div, span, p, header, footer,
   article, section, aside, main,
+  address, menu, menuitem, nav, progress,
+  summary, details,
   ul, ol, li,
+  dl, dd, dt,
   h1, h2, h3, h4, h5, h6,
-  strong, em, a, pre,
+  strong, em, a, pre, code,
   legend, fieldset, input, button,
   select, option, optgroup, textarea,
   video, audio, source,
-  img, figure, figcaption
+  img, figure, figcaption,
+  table, thead, tbody, tfoot, tr, td,
+  col, colgroup, caption
 } from 'frampton-dom/html/dom';
 
 /**
@@ -26,7 +30,6 @@ Frampton.DOM         = {};
 Frampton.DOM.VERSION = '0.0.3';
 Frampton.DOM.diff    = diff;
 Frampton.DOM.update  = update;
-Frampton.DOM.props = props;
 
 /**
  * @name Html
@@ -37,20 +40,33 @@ Frampton.DOM.Html            = {};
 // PRIMITIVES
 Frampton.DOM.Html.node       = node;
 Frampton.DOM.Html.text       = text;
-// MAIN
+// BASICS
 Frampton.DOM.Html.div        = div;
 Frampton.DOM.Html.span       = span;
 Frampton.DOM.Html.p          = p;
+Frampton.DOM.Html.a          = a;
+// SEMANTIC
 Frampton.DOM.Html.header     = header;
 Frampton.DOM.Html.footer     = footer;
 Frampton.DOM.Html.article    = article;
 Frampton.DOM.Html.section    = section;
 Frampton.DOM.Html.aside      = aside;
 Frampton.DOM.Html.main       = main;
+Frampton.DOM.Html.nav        = nav;
+Frampton.DOM.Html.menu       = menu;
+Frampton.DOM.Html.menuitem   = menuitem;
+Frampton.DOM.Html.address    = address;
+Frampton.DOM.Html.summary    = summary;
+Frampton.DOM.Html.details    = details;
+Frampton.DOM.Html.progress   = progress;
 // LISTS
 Frampton.DOM.Html.ul         = ul;
 Frampton.DOM.Html.ol         = ol;
 Frampton.DOM.Html.li         = li;
+// DESCRIPTION LISTS
+Frampton.DOM.Html.dl         = dl;
+Frampton.DOM.Html.dt         = dt;
+Frampton.DOM.Html.dd         = dd;
 // HEADINGS
 Frampton.DOM.Html.h1         = h1;
 Frampton.DOM.Html.h2         = h2;
@@ -62,7 +78,7 @@ Frampton.DOM.Html.h6         = h6;
 Frampton.DOM.Html.strong     = strong;
 Frampton.DOM.Html.em         = em;
 Frampton.DOM.Html.pre        = pre;
-Frampton.DOM.Html.a          = a;
+Frampton.DOM.Html.code       = code;
 // FORMS
 Frampton.DOM.Html.legend     = legend;
 Frampton.DOM.Html.fieldset   = fieldset;
@@ -79,3 +95,13 @@ Frampton.DOM.Html.video      = video;
 Frampton.DOM.Html.audio      = audio;
 Frampton.DOM.Html.source     = source;
 Frampton.DOM.Html.figcaption = figcaption;
+// TABLES
+Frampton.DOM.Html.table      = table;
+Frampton.DOM.Html.thead      = thead;
+Frampton.DOM.Html.tbody      = tbody;
+Frampton.DOM.Html.tfoot      = tfoot;
+Frampton.DOM.Html.tr         = tr;
+Frampton.DOM.Html.td         = td;
+Frampton.DOM.Html.col        = col;
+Frampton.DOM.Html.colgroup   = colgroup;
+Frampton.DOM.Html.caption    = caption;
