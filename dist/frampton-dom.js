@@ -30,7 +30,7 @@ define('frampton-dom', ['exports', 'frampton/namespace', 'frampton-dom/diff', 'f
    * @memberof Frampton
    */
   _Frampton['default'].DOM = {};
-  _Frampton['default'].DOM.VERSION = '0.0.3';
+  _Frampton['default'].DOM.VERSION = '0.0.4';
   _Frampton['default'].DOM.diff = _diff['default'];
   _Frampton['default'].DOM.update = _update['default'];
 

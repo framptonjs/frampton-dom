@@ -27,7 +27,7 @@ import {
  * @memberof Frampton
  */
 Frampton.DOM         = {};
-Frampton.DOM.VERSION = '0.0.3';
+Frampton.DOM.VERSION = '0.0.4';
 Frampton.DOM.diff    = diff;
 Frampton.DOM.update  = update;
 
