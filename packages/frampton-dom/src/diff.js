@@ -8,7 +8,8 @@ import {
   props,
   text,
   reorder,
-  replace
+  replace,
+  remove
 } from 'frampton-dom/virtual/patch';
 import isNode from 'frampton-dom/utils/is_node';
 import isText from 'frampton-dom/utils/is_text';
@@ -125,7 +126,11 @@ function diffChildren(oldNode, newNode) {
           // Old node has no new index, delete it
           if (isUndefined(newIndex)) {
             dirty = true;
-            orderMap[i] = undefined;
+            if (oldChild.attributes.transitionOut) {
+              orderMap[i] = remove(null, oldChild.attributes.transitionOut);
+            } else {
+              orderMap[i] = undefined;
+            }
 
           // The index changed, we have a move
           } else if (newIndex !== i) {
@@ -174,7 +179,11 @@ function diffChildren(oldNode, newNode) {
 
         // Old node was deleted
         if (isUndefined(newIndex)) {
-          orderMap[i] = undefined;
+          if (oldChild.attributes.transitionOut) {
+            orderMap[i] = remove(null, oldChild.attributes.transitionOut);
+          } else {
+            orderMap[i] = undefined;
+          }
 
         // Old node was moved
         } else if (newIndex !== i) {
@@ -192,7 +201,7 @@ function diffChildren(oldNode, newNode) {
 
         inserts[i] = insert(null, newChild);
 
-      // No old node, straigh insert
+      // No old node, straight insert
       } else {
         inserts[i] = insert(null, newChild);
       }
@@ -216,10 +225,18 @@ function diffChildren(oldNode, newNode) {
           }
           patch = diffChildren(oldChild, newChildren[newIndex]);
         } else {
-          orderMap[i] = undefined;
+          if (oldChild.attributes.transitionOut) {
+            orderMap[i] = remove(null, oldChild.attributes.transitionOut);
+          } else {
+            orderMap[i] = undefined;
+          }
         }
       } else {
-        orderMap[i] = undefined;
+        if (oldChild.attributes.transitionOut) {
+          orderMap[i] = remove(null, oldChild.attributes.transitionOut);
+        } else {
+          orderMap[i] = undefined;
+        }
       }
     }
 

@@ -22,6 +22,7 @@ export default function diff_props(oldProps, newProps) {
     }
 
     if (key === 'transition') {
+      oldValue = validatedTransition(oldValue);
       newValue = validatedTransition(newValue);
       let tempDiff = diff_props(oldValue, newValue);
       if (tempDiff) {

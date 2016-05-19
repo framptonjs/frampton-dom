@@ -1,6 +1,7 @@
 import isNothing from 'frampton-utils/is_nothing';
 import isObject from 'frampton-utils/is_object';
 import warn from 'frampton-utils/warn';
+import contains from 'frampton-list/contains';
 import applyStyles from 'frampton-style/apply_styles';
 import applyClasses from 'frampton-dom/ops/apply_classes';
 import validatedClass from 'frampton-dom/utils/validated_class';
@@ -8,6 +9,13 @@ import validatedTransition from 'frampton-dom/utils/validated_transition';
 import applyTransition from 'frampton-dom/ops/apply_transition';
 import isEvent from 'frampton-dom/events/utils/is_event';
 import { addEvent, removeEvent } from 'frampton-dom/events/event_dispatcher';
+
+// Properties to not add to DOM node
+const properties = [
+  'key',
+  'transitionIn',
+  'transitionOut'
+];
 
 /**
  * @name applyAttributes
@@ -36,7 +44,7 @@ export default function apply_attributes(node, attrs) {
         applyClasses(node, validatedClass(value));
       } else if (isEvent(name)) {
         addEvent(name, node, value);
-      } else if (name !== 'key') {
+      } else if (!contains(properties, name)) {
         node.setAttribute(name, value);
       }
     }

@@ -72,17 +72,18 @@ QUnit.test('Should correctly diff transitions', function() {
   };
   const expectedDiff = {
     transition : {
-      class : {
-        add : ['forward'],
-        remove : ['walk']
-      },
-      style : {
-        background : undefined,
-        color : 'red'
+      to : {
+        class : {
+          add : ['forward'],
+          remove : ['walk']
+        },
+        style : {
+          background : undefined,
+          color : 'red'
+        }
       }
     }
   };
 
   deepEqual(diff(oldProps, newProps), expectedDiff);
 });
-

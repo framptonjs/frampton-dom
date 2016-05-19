@@ -4,184 +4,184 @@ import vtext from 'frampton-dom/virtual/text';
 
 // GENERIC DOM NODE
 
-export var node = (name, attrs, children) => {
+export const node = (name, attrs, children) => {
   return vnode(name, attrs, children);
 };
 
 
 // TEXT NODE
 
-export var text = (value) => {
+export const text = (value) => {
   return vtext(value);
 };
 
 
 // MAIN TAGS
 
-export var div = (attrs, children) => {
+export const div = (attrs, children) => {
   return vnode('div', attrs, children);
 };
 
-export var span = (attrs, children) => {
+export const span = (attrs, children) => {
   return vnode('span', attrs, children);
 };
 
-export var header = (attrs, children) => {
+export const header = (attrs, children) => {
   return vnode('header', attrs, children);
 };
 
-export var footer = (attrs, children) => {
+export const footer = (attrs, children) => {
   return vnode('footer', attrs, children);
 };
 
-export var article = (attrs, children) => {
+export const article = (attrs, children) => {
   return vnode('article', attrs, children);
 };
 
-export var section = (attrs, children) => {
+export const section = (attrs, children) => {
   return vnode('section', attrs, children);
 };
 
-export var aside = (attrs, children) => {
+export const aside = (attrs, children) => {
   return vnode('aside', attrs, children);
 };
 
-export var main = (attrs, children) => {
+export const main = (attrs, children) => {
   return vnode('main', attrs, children);
 };
 
-export var p = (attrs, children) => {
+export const p = (attrs, children) => {
   return vnode('p', attrs, children);
 };
 
-export var a = (attrs, children) => {
+export const a = (attrs, children) => {
   return vnode('a', attrs, children);
 };
 
 
 // HEADINGS
 
-export var h1 = (attrs, children) => {
+export const h1 = (attrs, children) => {
   return vnode('h1', attrs, children);
 };
 
-export var h2 = (attrs, children) => {
+export const h2 = (attrs, children) => {
   return vnode('h2', attrs, children);
 };
 
-export var h3 = (attrs, children) => {
+export const h3 = (attrs, children) => {
   return vnode('h3', attrs, children);
 };
 
-export var h4 = (attrs, children) => {
+export const h4 = (attrs, children) => {
   return vnode('h4', attrs, children);
 };
 
-export var h5 = (attrs, children) => {
+export const h5 = (attrs, children) => {
   return vnode('h5', attrs, children);
 };
 
-export var h6 = (attrs, children) => {
+export const h6 = (attrs, children) => {
   return vnode('h6', attrs, children);
 };
 
 
 // LISTS
 
-export var ul = (attrs, children) => {
+export const ul = (attrs, children) => {
   return vnode('ul', attrs, children);
 };
 
-export var ol = (attrs, children) => {
+export const ol = (attrs, children) => {
   return vnode('ol', attrs, children);
 };
 
-export var li = (attrs, children) => {
+export const li = (attrs, children) => {
   return vnode('li', attrs, children);
 };
 
 
 // MEDIA
 
-export var img = (attrs, children) => {
+export const img = (attrs, children) => {
   return vnode('img', attrs, children);
 };
 
-export var video = (attrs, children) => {
+export const video = (attrs, children) => {
   return vnode('video', attrs, children);
 };
 
-export var audio = (attrs, children) => {
+export const audio = (attrs, children) => {
   return vnode('audio', attrs, children);
 };
 
-export var source = (attrs, children) => {
+export const source = (attrs, children) => {
   return vnode('source', attrs, children);
 };
 
 
-export var figure = (attrs, children) => {
+export const figure = (attrs, children) => {
   return vnode('figure', attrs, children);
 };
 
-export var figcaption = (attrs, children) => {
+export const figcaption = (attrs, children) => {
   return vnode('figcaption', attrs, children);
 };
 
 
 // FORMS
 
-export var legend = (attrs, children) => {
+export const legend = (attrs, children) => {
   return vnode('legend', attrs, children);
 };
 
-export var fieldset = (attrs, children) => {
+export const fieldset = (attrs, children) => {
   return vnode('fieldset', attrs, children);
 };
 
-export var option = (attrs, children) => {
+export const option = (attrs, children) => {
   return vnode('option', attrs, children);
 };
 
-export var optgroup = (attrs, children) => {
+export const optgroup = (attrs, children) => {
   return vnode('optgroup', attrs, children);
 };
 
-export var label = (attrs, children) => {
+export const label = (attrs, children) => {
   return vnode('label', attrs, children);
 };
 
-export var button = (attrs, children) => {
+export const button = (attrs, children) => {
   return vnode('button', attrs, children);
 };
 
-export var select = (attrs, children) => {
+export const select = (attrs, children) => {
   return vnode('select', attrs, children);
 };
 
-export var input = (attrs, children) => {
+export const input = (attrs, children) => {
   return vnode('input', attrs, children);
 };
 
-export var textarea = (attrs, children) => {
+export const textarea = (attrs, children) => {
   return vnode('textarea', attrs, children);
 };
 
-export var caption = (attrs, children) => {
+export const caption = (attrs, children) => {
   return vnode('caption', attrs, children);
 };
 
 
 // FORMATTING
 
-export var pre = (attrs, children) => {
+export const pre = (attrs, children) => {
   return vnode('pre', attrs, children);
 };
 
-export var strong = (attrs, children) => {
+export const strong = (attrs, children) => {
   return vnode('strong', attrs, children);
 };
 
-export var em = (attrs, children) => {
+export const em = (attrs, children) => {
   return vnode('em', attrs, children);
 };

@@ -11,9 +11,15 @@ import validatedClass from 'frampton-dom/utils/validated_class';
  * @param {Object} desc An object describing the transition to make
  */
 export default function apply_transition(node, desc) {
+
+  const startClasses = validatedClass(desc.from.class);
+  const startFrame = normalizedFrame(desc.from.style);
+  applyClasses(node, startClasses);
+  applyStyles(node, startFrame);
+
   immediate(() => {
-    const endClasses = validatedClass(desc.class);
-    const endFrame = normalizedFrame(desc.style || {});
+    const endClasses = validatedClass(desc.to.class);
+    const endFrame = normalizedFrame(desc.to.style || {});
     // Force a reflow to make sure we're in a good state
     reflow(node);
     applyClasses(node, endClasses);

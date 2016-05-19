@@ -219,7 +219,11 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_defined', '
             // Old node has no new index, delete it
             if (_isUndefined['default'](newIndex)) {
               dirty = true;
-              orderMap[i] = undefined;
+              if (oldChild.attributes.transitionOut) {
+                orderMap[i] = _framptonDomVirtualPatch.remove(null, oldChild.attributes.transitionOut);
+              } else {
+                orderMap[i] = undefined;
+              }
 
               // The index changed, we have a move
             } else if (newIndex !== i) {
@@ -268,7 +272,11 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_defined', '
 
               // Old node was deleted
               if (_isUndefined['default'](newIndex)) {
-                orderMap[i] = undefined;
+                if (oldChild.attributes.transitionOut) {
+                  orderMap[i] = _framptonDomVirtualPatch.remove(null, oldChild.attributes.transitionOut);
+                } else {
+                  orderMap[i] = undefined;
+                }
 
                 // Old node was moved
               } else if (newIndex !== i) {
@@ -286,7 +294,7 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_defined', '
 
               inserts[i] = _framptonDomVirtualPatch.insert(null, newChild);
 
-              // No old node, straigh insert
+              // No old node, straight insert
             } else {
                 inserts[i] = _framptonDomVirtualPatch.insert(null, newChild);
               }
@@ -310,10 +318,18 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_defined', '
                 }
                 patch = diffChildren(oldChild, newChildren[newIndex]);
               } else {
-                orderMap[i] = undefined;
+                if (oldChild.attributes.transitionOut) {
+                  orderMap[i] = _framptonDomVirtualPatch.remove(null, oldChild.attributes.transitionOut);
+                } else {
+                  orderMap[i] = undefined;
+                }
               }
             } else {
-              orderMap[i] = undefined;
+              if (oldChild.attributes.transitionOut) {
+                orderMap[i] = _framptonDomVirtualPatch.remove(null, oldChild.attributes.transitionOut);
+              } else {
+                orderMap[i] = undefined;
+              }
             }
           }
 
@@ -867,7 +883,7 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
   exports.em = em;
 });
-define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-style/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/event_dispatcher'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_object, _framptonUtilsWarn, _framptonStyleApply_styles, _framptonDomOpsApply_classes, _framptonDomUtilsValidated_class, _framptonDomUtilsValidated_transition, _framptonDomOpsApply_transition, _framptonDomEventsUtilsIs_event, _framptonDomEventsEvent_dispatcher) {
+define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-list/contains', 'frampton-style/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/event_dispatcher'], function (exports, module, _framptonUtilsIs_nothing, _framptonUtilsIs_object, _framptonUtilsWarn, _framptonListContains, _framptonStyleApply_styles, _framptonDomOpsApply_classes, _framptonDomUtilsValidated_class, _framptonDomUtilsValidated_transition, _framptonDomOpsApply_transition, _framptonDomEventsUtilsIs_event, _framptonDomEventsEvent_dispatcher) {
   'use strict';
 
   module.exports = apply_attributes;
@@ -880,6 +896,8 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-util
 
   var _warn = _interopRequireDefault(_framptonUtilsWarn);
 
+  var _contains = _interopRequireDefault(_framptonListContains);
+
   var _applyStyles = _interopRequireDefault(_framptonStyleApply_styles);
 
   var _applyClasses = _interopRequireDefault(_framptonDomOpsApply_classes);
@@ -891,6 +909,9 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-util
   var _applyTransition = _interopRequireDefault(_framptonDomOpsApply_transition);
 
   var _isEvent = _interopRequireDefault(_framptonDomEventsUtilsIs_event);
+
+  // Properties to not add to DOM node
+  var properties = ['key', 'transitionIn', 'transitionOut'];
 
   /**
    * @name applyAttributes
@@ -920,7 +941,7 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'module', 'frampton-util
           _applyClasses['default'](node, _validatedClass['default'](value));
         } else if (_isEvent['default'](_name)) {
           _framptonDomEventsEvent_dispatcher.addEvent(_name, node, value);
-        } else if (_name !== 'key') {
+        } else if (!_contains['default'](properties, _name)) {
           node.setAttribute(_name, value);
         }
       }
@@ -1001,6 +1022,49 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
   }
 
   /**
+   * Nodes that are transitioning out should just be removed to get us in a good
+   * state before performing the next set of updates.
+   */
+  function resetChildState(node) {
+    if (node && node.childNodes) {
+      var children = node.childNodes;
+      var len = children.length;
+      for (var i = 0; i < len; i++) {
+        var child = children[i];
+        if (child && child.nodeType === 1 && child.getAttribute('data-transition-out') === 'true') {
+          _removeNode['default'](child);
+        }
+      }
+    }
+  }
+
+  function performInserts(current, patches) {
+
+    var arr = [];
+    var len = current ? current.childNodes.length : 0;
+
+    for (var i = 0; i < len; i++) {
+      var child = current.childNodes[i];
+      // Filter out nodes that are transitioning out
+      if (child.nodeType === 3 || child.getAttribute('data-transition-out') !== 'true') {
+        arr.push(child);
+      }
+    }
+
+    var cursor = 0;
+
+    for (var key in patches) {
+      if (!isNaN(key)) {
+        var update = patches[key];
+        executePatch(update, current, arr[key - cursor]);
+        if (update.type === _PATCHES['default'].INSERT) {
+          cursor += 1;
+        }
+      }
+    }
+  }
+
+  /**
    * @name applyPatch
    * @param {Array} patch
    * @param {Element} parent
@@ -1008,6 +1072,8 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
    */
 
   function apply_patch(patch, parent, current) {
+
+    resetChildState(current);
 
     // Apply patches to child nodes
     for (var key in patch) {
@@ -1024,11 +1090,7 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
 
     // Insert new nodes
     if (patch._i) {
-      for (var key in patch._i) {
-        if (!isNaN(key)) {
-          executePatch(patch._i[key], current, nodeAtIndex(current, key));
-        }
-      }
+      performInserts(current, patch._i);
     }
 
     // Patch props and text
@@ -1063,9 +1125,15 @@ define('frampton-dom/ops/apply_transition', ['exports', 'module', 'frampton-styl
    */
 
   function apply_transition(node, desc) {
+
+    var startClasses = _validatedClass['default'](desc.from['class']);
+    var startFrame = _normalizedFrame['default'](desc.from.style);
+    _applyClasses['default'](node, startClasses);
+    _applyStyles['default'](node, startFrame);
+
     _immediate['default'](function () {
-      var endClasses = _validatedClass['default'](desc['class']);
-      var endFrame = _normalizedFrame['default'](desc.style || {});
+      var endClasses = _validatedClass['default'](desc.to['class']);
+      var endFrame = _normalizedFrame['default'](desc.to.style || {});
       // Force a reflow to make sure we're in a good state
       _reflow['default'](node);
       _applyClasses['default'](node, endClasses);
@@ -1118,7 +1186,7 @@ define('frampton-dom/ops/create_element', ['exports', 'module', 'frampton-dom/ut
     return node;
   }
 });
-define('frampton-dom/ops/insert_node', ['exports', 'module', 'frampton-dom/ops/create_element'], function (exports, module, _framptonDomOpsCreate_element) {
+define('frampton-dom/ops/insert_node', ['exports', 'module', 'frampton-dom/ops/create_element', 'frampton-dom/utils/transition_in'], function (exports, module, _framptonDomOpsCreate_element, _framptonDomUtilsTransition_in) {
   'use strict';
 
   module.exports = insert_node;
@@ -1126,6 +1194,8 @@ define('frampton-dom/ops/insert_node', ['exports', 'module', 'frampton-dom/ops/c
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
   var _createElement = _interopRequireDefault(_framptonDomOpsCreate_element);
+
+  var _transitionIn = _interopRequireDefault(_framptonDomUtilsTransition_in);
 
   /*
    * @name insertNode
@@ -1136,8 +1206,11 @@ define('frampton-dom/ops/insert_node', ['exports', 'module', 'frampton-dom/ops/c
    * @param {VirtualNode} vnode
    */
 
-  function insert_node(parent, current, update) {
-    var newNode = _createElement['default'](update);
+  function insert_node(parent, current, vnode) {
+    var newNode = _createElement['default'](vnode);
+    if (vnode.attributes.transitionIn) {
+      _transitionIn['default'](newNode, vnode.attributes.transitionIn);
+    }
     if (parent) {
       if (current) {
         parent.insertBefore(newNode, current);
@@ -1168,7 +1241,19 @@ define('frampton-dom/ops/remove_node', ['exports', 'module', 'frampton-dom/event
     }
   }
 });
-define("frampton-dom/ops/reorder_nodes", ["exports", "module"], function (exports, module) {
+define('frampton-dom/ops/reorder_nodes', ['exports', 'module', 'frampton-dom/utils/is_patch', 'frampton-dom/ops/remove_node', 'frampton-dom/utils/transition_out'], function (exports, module, _framptonDomUtilsIs_patch, _framptonDomOpsRemove_node, _framptonDomUtilsTransition_out) {
+  'use strict';
+
+  module.exports = reorder_nodes;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _isPatch = _interopRequireDefault(_framptonDomUtilsIs_patch);
+
+  var _removeNode = _interopRequireDefault(_framptonDomOpsRemove_node);
+
+  var _transitionOut = _interopRequireDefault(_framptonDomUtilsTransition_out);
+
   /*
    * @name reorderNodes
    * @memberOf Frampton.DOM
@@ -1177,9 +1262,6 @@ define("frampton-dom/ops/reorder_nodes", ["exports", "module"], function (export
    * @param {Element} parent
    * @param {Array} order
    */
-  "use strict";
-
-  module.exports = reorder_nodes;
 
   function reorder_nodes(parent, current, order) {
 
@@ -1195,25 +1277,42 @@ define("frampton-dom/ops/reorder_nodes", ["exports", "module"], function (export
 
     // Easy look up for what new indexes should be
     for (var i = 0; i < order.length; i++) {
-      if (order[i] !== undefined) {
-        map[order[i]] = i;
+      var next = order[i];
+      if (next !== undefined && !_isPatch['default'](next)) {
+        map[next] = i;
       }
     }
 
+    /**
+     *Cursor is used to keep our position when dealing with nodes that are
+     * transitioning out, therefore still in the DOM but we don't want to
+     * consider it's position when inserting new elements.
+     */
+    var cursor = 0;
+
     for (var i = 0; i < len; i++) {
+
       if (order[i] === undefined) {
-        current.removeChild(arr[i]);
+        _removeNode['default'](arr[i]);
+      }
+
+      if (_isPatch['default'](order[i])) {
+        _transitionOut['default'](arr[i], order[i].update);
+        cursor += 1;
       }
 
       var idx = map[i];
-      var ref = current.childNodes[i];
+      var ref = current.childNodes[i + cursor];
+
       if (idx !== undefined) {
         var node = arr[idx];
         if (node && !ref) {
           current.appendChild(node);
         } else if (node && ref !== node) {
           current.insertBefore(node, ref);
-        } else if (node && ref === node) {}
+        } else if (node && ref === node) {
+          /* No move */
+        }
       }
     }
   }
@@ -1355,6 +1454,7 @@ define('frampton-dom/utils/diff_props', ['exports', 'module', 'frampton-utils/is
       }
 
       if (key === 'transition') {
+        oldValue = _validatedTransition['default'](oldValue);
         newValue = _validatedTransition['default'](newValue);
         var tempDiff = diff_props(oldValue, newValue);
         if (tempDiff) {
@@ -1424,6 +1524,19 @@ define('frampton-dom/utils/is_node', ['exports', 'module', 'frampton-utils/is_ob
     return _isObject['default'](node) && node.ctor === 'VirtualNode';
   }
 });
+define('frampton-dom/utils/is_patch', ['exports', 'module', 'frampton-utils/is_object'], function (exports, module, _framptonUtilsIs_object) {
+  'use strict';
+
+  module.exports = is_patch;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _isObject = _interopRequireDefault(_framptonUtilsIs_object);
+
+  function is_patch(node) {
+    return _isObject['default'](node) && node.ctor === 'VirtualPatch';
+  }
+});
 define('frampton-dom/utils/is_same_node', ['exports', 'module', 'frampton-utils/is_defined'], function (exports, module, _framptonUtilsIs_defined) {
   'use strict';
 
@@ -1476,6 +1589,63 @@ define('frampton-dom/utils/props_diff', ['exports', 'module', 'frampton-dom/util
     return _diffProps['default'](oldNode.attributes, newNode.attributes);
   }
 });
+define('frampton-dom/utils/transition_in', ['exports', 'module', 'frampton-dom/ops/apply_transition', 'frampton-dom/utils/validated_transition'], function (exports, module, _framptonDomOpsApply_transition, _framptonDomUtilsValidated_transition) {
+  'use strict';
+
+  module.exports = transitionIn;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _applyTransition = _interopRequireDefault(_framptonDomOpsApply_transition);
+
+  var _validatedTransition = _interopRequireDefault(_framptonDomUtilsValidated_transition);
+
+  function handleTransition(node) {
+    function eventHandler(evt) {
+      if (evt.target === node) {
+        node.removeEventListener('transitionend', eventHandler);
+        node.removeAttribute('data-transition-in');
+      }
+    }
+    node.addEventListener('transitionend', eventHandler);
+  }
+
+  function transitionIn(node, transition) {
+    node.setAttribute('data-transition-in', 'true');
+    _applyTransition['default'](node, _validatedTransition['default'](transition));
+    handleTransition(node);
+  }
+});
+define('frampton-dom/utils/transition_out', ['exports', 'module', 'frampton-dom/ops/remove_node', 'frampton-dom/ops/apply_transition', 'frampton-dom/utils/validated_transition'], function (exports, module, _framptonDomOpsRemove_node, _framptonDomOpsApply_transition, _framptonDomUtilsValidated_transition) {
+  'use strict';
+
+  module.exports = transitionOut;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _removeNode = _interopRequireDefault(_framptonDomOpsRemove_node);
+
+  var _applyTransition = _interopRequireDefault(_framptonDomOpsApply_transition);
+
+  var _validatedTransition = _interopRequireDefault(_framptonDomUtilsValidated_transition);
+
+  function handleTransition(node) {
+    function eventHandler(evt) {
+      if (evt.target === node) {
+        node.removeEventListener('transitionend', eventHandler);
+        _removeNode['default'](node);
+      }
+    }
+    node.addEventListener('transitionend', eventHandler);
+  }
+
+  function transitionOut(node, transition) {
+    node.removeAttribute('data-transition-in');
+    node.setAttribute('data-transition-out', 'true');
+    _applyTransition['default'](node, _validatedTransition['default'](transition));
+    handleTransition(node);
+  }
+});
 define('frampton-dom/utils/validated_class', ['exports', 'module', 'frampton-utils/is_string', 'frampton-dom/utils/not_empty', 'frampton-dom/utils/empty_class'], function (exports, module, _framptonUtilsIs_string, _framptonDomUtilsNot_empty, _framptonDomUtilsEmpty_class) {
   'use strict';
 
@@ -1513,12 +1683,14 @@ define('frampton-dom/utils/validated_class', ['exports', 'module', 'frampton-uti
     return str;
   }
 });
-define('frampton-dom/utils/validated_transition', ['exports', 'module', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/empty_class'], function (exports, module, _framptonDomUtilsValidated_class, _framptonDomUtilsEmpty_class) {
+define('frampton-dom/utils/validated_transition', ['exports', 'module', 'frampton-motion/normalized_frame', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/empty_class'], function (exports, module, _framptonMotionNormalized_frame, _framptonDomUtilsValidated_class, _framptonDomUtilsEmpty_class) {
   'use strict';
 
   module.exports = validated_transition;
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _normalizedFrame = _interopRequireDefault(_framptonMotionNormalized_frame);
 
   var _validatedClass = _interopRequireDefault(_framptonDomUtilsValidated_class);
 
@@ -1528,22 +1700,42 @@ define('frampton-dom/utils/validated_transition', ['exports', 'module', 'frampto
 
     if (!desc) {
       return {
-        'class': _emptyClass['default'](),
-        style: {}
+        from: {
+          'class': _emptyClass['default'](),
+          style: {}
+        },
+        to: {
+          'class': _emptyClass['default'](),
+          style: {}
+        }
       };
-    }
-
-    if (!desc['class']) {
-      desc['class'] = _emptyClass['default']();
     } else {
-      desc['class'] = _validatedClass['default'](desc['class']);
-    }
 
-    if (!desc.style) {
-      desc.style = {};
-    }
+      var temp = {
+        from: {},
+        to: {}
+      };
 
-    return desc;
+      if (desc.from) {
+        temp.from['class'] = _validatedClass['default'](desc.from['class']);
+        temp.from.style = _normalizedFrame['default'](desc.from.style || {});
+      }
+
+      if (desc.to) {
+        temp.to['class'] = _validatedClass['default'](desc.to['class']);
+        temp.to.style = _normalizedFrame['default'](desc.to.style || {});
+      }
+
+      if (desc['class']) {
+        temp.to['class'] = _validatedClass['default'](desc['class']);
+      }
+
+      if (desc.style) {
+        temp.to.style = _normalizedFrame['default'](desc.style || {});
+      }
+
+      return temp;
+    }
   }
 });
 define('frampton-dom/virtual/node', ['exports', 'module', 'frampton-list/length', 'frampton-utils/is_defined', 'frampton-utils/is_array', 'frampton-utils/is_object', 'frampton-utils/is_string'], function (exports, module, _framptonListLength, _framptonUtilsIs_defined, _framptonUtilsIs_array, _framptonUtilsIs_object, _framptonUtilsIs_string) {

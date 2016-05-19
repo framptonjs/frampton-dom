@@ -9,7 +9,7 @@ import updateText from 'frampton-dom/ops/update_text';
 function executePatch(patch, parentNode, currentNode) {
   const type = patch.type;
   const update = patch.update;
-  switch(patch.type) {
+  switch (patch.type) {
     case PATCHES.NONE:
       break;
     case PATCHES.APPEND:
@@ -40,12 +40,59 @@ function nodeAtIndex(node, index) {
 }
 
 /**
+ * Nodes that are transitioning out should just be removed to get us in a good
+ * state before performing the next set of updates.
+ */
+function resetChildState(node) {
+  if (node && node.childNodes) {
+    let children = node.childNodes;
+    let len = children.length;
+    for (let i = 0; i < len; i++) {
+      let child = children[i];
+      if (
+        child &&
+        child.nodeType === 1 &&
+        child.getAttribute('data-transition-out') === 'true'
+      ) {
+        removeNode(child);
+      }
+    }
+  }
+}
+
+function performInserts(current, patches) {
+
+  const arr = [];
+  const len = (current) ? current.childNodes.length : 0;
+
+  for (let i = 0; i < len; i++) {
+    let child = current.childNodes[i];
+    // Filter out nodes that are transitioning out
+    if (child.nodeType === 3 || child.getAttribute('data-transition-out') !== 'true') {
+      arr.push(child);
+    }
+  }
+
+  let cursor = 0;
+
+  for (let key in patches) {
+    if (!isNaN(key)) {
+      let update = patches[key];
+      executePatch(update, current, arr[(key - cursor)]);
+      if (update.type === PATCHES.INSERT) { cursor += 1; }
+    }
+  }
+}
+
+/**
  * @name applyPatch
  * @param {Array} patch
  * @param {Element} parent
  * @param {Element} current
  */
 export default function apply_patch(patch, parent, current) {
+
+  resetChildState(current);
 
   // Apply patches to child nodes
   for (let key in patch) {
@@ -62,11 +109,7 @@ export default function apply_patch(patch, parent, current) {
 
   // Insert new nodes
   if (patch._i) {
-    for (let key in patch._i) {
-      if (!isNaN(key)) {
-        executePatch(patch._i[key], current, nodeAtIndex(current, key));
-      }
-    }
+    performInserts(current, patch._i);
   }
 
   // Patch props and text
