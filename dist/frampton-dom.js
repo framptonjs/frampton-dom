@@ -1096,12 +1096,14 @@ define("frampton-dom/ops/apply_classes", ["exports", "module"], function (export
     }
   }
 });
-define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtual/patch_types', 'frampton-dom/ops/apply_attributes', 'frampton-dom/ops/remove_node', 'frampton-dom/ops/replace_node', 'frampton-dom/ops/reorder_nodes', 'frampton-dom/ops/insert_node', 'frampton-dom/ops/update_text'], function (exports, module, _framptonDomVirtualPatch_types, _framptonDomOpsApply_attributes, _framptonDomOpsRemove_node, _framptonDomOpsReplace_node, _framptonDomOpsReorder_nodes, _framptonDomOpsInsert_node, _framptonDomOpsUpdate_text) {
+define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-utils/is_defined', 'frampton-dom/virtual/patch_types', 'frampton-dom/ops/apply_attributes', 'frampton-dom/ops/remove_node', 'frampton-dom/ops/replace_node', 'frampton-dom/ops/reorder_nodes', 'frampton-dom/ops/insert_node', 'frampton-dom/ops/update_text'], function (exports, module, _framptonUtilsIs_defined, _framptonDomVirtualPatch_types, _framptonDomOpsApply_attributes, _framptonDomOpsRemove_node, _framptonDomOpsReplace_node, _framptonDomOpsReorder_nodes, _framptonDomOpsInsert_node, _framptonDomOpsUpdate_text) {
   'use strict';
 
   module.exports = apply_patch;
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _isDefined = _interopRequireDefault(_framptonUtilsIs_defined);
 
   var _PATCHES = _interopRequireDefault(_framptonDomVirtualPatch_types);
 
@@ -1142,6 +1144,10 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
     }
   }
 
+  function isNumeric(obj) {
+    return !isNaN(obj);
+  }
+
   function nodeAtIndex(node, index) {
     if (node && node.childNodes) {
       return node.childNodes[index] || null;
@@ -1160,7 +1166,7 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
       var len = children.length;
       for (var i = 0; i < len; i++) {
         var child = children[i];
-        if (child && child.nodeType === 1 && child.getAttribute('data-transition-out') === 'true') {
+        if (_isDefined['default'](child) && child.nodeType === 1 && child.getAttribute('data-transition-out') === 'true') {
           _removeNode['default'](child);
         }
       }
@@ -1206,7 +1212,7 @@ define('frampton-dom/ops/apply_patch', ['exports', 'module', 'frampton-dom/virtu
 
     // Apply patches to child nodes
     for (var key in patch) {
-      if (!isNaN(key)) {
+      if (isNumeric(key)) {
         var child = nodeAtIndex(current, key);
         apply_patch(patch[key], current, child);
       }
@@ -1332,19 +1338,20 @@ define('frampton-dom/ops/insert_node', ['exports', 'module', 'frampton-dom/ops/c
    * @method
    * @private
    * @param {Element} parent
+   * @param {Element} current
    * @param {VirtualNode} vnode
    */
 
   function insert_node(parent, current, vnode) {
-    var newNode = _createElement['default'](vnode);
+    var child = _createElement['default'](vnode);
     if (vnode.attributes.transitionIn) {
-      _transitionIn['default'](newNode, vnode.attributes.transitionIn);
+      _transitionIn['default'](child, vnode.attributes.transitionIn);
     }
     if (parent) {
       if (current) {
-        parent.insertBefore(newNode, current);
+        parent.insertBefore(child, current);
       } else {
-        parent.appendChild(newNode);
+        parent.appendChild(child);
       }
     }
   }
@@ -1399,9 +1406,10 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'module', 'frampton-dom/uti
     var arr = [];
     var map = [];
 
-    // Nodes in original order.
+    // Child nodes in original order.
     for (var i = 0; i < len; i++) {
-      arr.push(children[i]);
+      var child = children[i];
+      arr.push(child);
     }
 
     // Easy look up for what new indexes should be
@@ -1413,7 +1421,7 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'module', 'frampton-dom/uti
     }
 
     /**
-     *Cursor is used to keep our position when dealing with nodes that are
+     * Cursor is used to keep our position when dealing with nodes that are
      * transitioning out, therefore still in the DOM but we don't want to
      * consider it's position when inserting new elements.
      */
@@ -1421,20 +1429,22 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'module', 'frampton-dom/uti
 
     for (var i = 0; i < len; i++) {
 
-      if (order[i] === undefined) {
-        _removeNode['default'](arr[i]);
+      var oldChild = arr[i];
+
+      if (oldChild && order[i] === undefined) {
+        _removeNode['default'](oldChild);
       }
 
       if (_isPatch['default'](order[i])) {
-        _transitionOut['default'](arr[i], order[i].update);
+        _transitionOut['default'](oldChild, order[i].update);
         cursor += 1;
       }
 
-      var idx = map[i];
-      var ref = current.childNodes[i + cursor];
+      var newChildIndex = map[i];
+      var ref = current.childNodes[i + cursor - 1];
 
-      if (idx !== undefined) {
-        var node = arr[idx];
+      if (newChildIndex !== undefined) {
+        var node = arr[newChildIndex];
         if (node && !ref) {
           current.appendChild(node);
         } else if (node && ref !== node) {

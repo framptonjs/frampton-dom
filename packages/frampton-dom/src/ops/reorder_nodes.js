@@ -17,9 +17,10 @@ export default function reorder_nodes(parent, current, order) {
   const arr = [];
   const map = [];
 
-  // Nodes in original order.
+  // Child nodes in original order.
   for (let i = 0; i < len; i++) {
-    arr.push(children[i]);
+    let child = children[i];
+    arr.push(child);
   }
 
   // Easy look up for what new indexes should be
@@ -31,7 +32,7 @@ export default function reorder_nodes(parent, current, order) {
   }
 
   /**
-   *Cursor is used to keep our position when dealing with nodes that are
+   * Cursor is used to keep our position when dealing with nodes that are
    * transitioning out, therefore still in the DOM but we don't want to
    * consider it's position when inserting new elements.
    */
@@ -39,20 +40,22 @@ export default function reorder_nodes(parent, current, order) {
 
   for (let i = 0; i < len; i++) {
 
-    if (order[i] === undefined) {
-      removeNode(arr[i]);
+    let oldChild = arr[i];
+
+    if (oldChild && order[i] === undefined) {
+      removeNode(oldChild);
     }
 
     if (isPatch(order[i])) {
-      transitionOut(arr[i], order[i].update);
+      transitionOut(oldChild, order[i].update);
       cursor += 1;
     }
 
-    let idx = map[i];
-    let ref = current.childNodes[(i + cursor)];
+    let newChildIndex = map[i];
+    let ref = current.childNodes[(i + cursor - 1)];
 
-    if (idx !== undefined) {
-      let node = arr[idx];
+    if (newChildIndex !== undefined) {
+      let node = arr[newChildIndex];
       if (node && !ref) {
         current.appendChild(node);
       } else if (node && ref !== node) {

@@ -1,3 +1,4 @@
+import isDefined from 'frampton-utils/is_defined';
 import PATCHES from 'frampton-dom/virtual/patch_types';
 import applyAttributes from 'frampton-dom/ops/apply_attributes';
 import removeNode from 'frampton-dom/ops/remove_node';
@@ -31,6 +32,10 @@ function executePatch(patch, parentNode, currentNode) {
   }
 }
 
+function isNumeric(obj) {
+  return !isNaN(obj);
+}
+
 function nodeAtIndex(node, index) {
   if (node && node.childNodes) {
     return (node.childNodes[index] || null);
@@ -50,7 +55,7 @@ function resetChildState(node) {
     for (let i = 0; i < len; i++) {
       let child = children[i];
       if (
-        child &&
+        isDefined(child) &&
         child.nodeType === 1 &&
         child.getAttribute('data-transition-out') === 'true'
       ) {
@@ -96,7 +101,7 @@ export default function apply_patch(patch, parent, current) {
 
   // Apply patches to child nodes
   for (let key in patch) {
-    if (!isNaN(key)) {
+    if (isNumeric(key)) {
       const child = nodeAtIndex(current, key);
       apply_patch(patch[key], current, child);
     }
