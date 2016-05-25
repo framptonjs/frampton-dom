@@ -15,12 +15,25 @@ export default function reorder_nodes(parent, current, order) {
   const children = current.childNodes;
   const len = children.length;
   const arr = [];
+  const remove = [];
   const map = [];
 
   // Child nodes in original order.
   for (let i = 0; i < len; i++) {
     let child = children[i];
-    arr.push(child);
+    if (child.nodeType === 1 && child.getAttribute('data-transition-out') === 'true') {
+      remove.push(child);
+    } else {
+      arr.push(child);
+    }
+  }
+
+  /**
+   * Because transitions are applied asyncronously it is possible
+   */
+  for (let i = 0; i < remove.length; i++) {
+    let child = remove[i];
+    removeNode(child);
   }
 
   // Easy look up for what new indexes should be
@@ -34,13 +47,13 @@ export default function reorder_nodes(parent, current, order) {
   /**
    * Cursor is used to keep our position when dealing with nodes that are
    * transitioning out, therefore still in the DOM but we don't want to
-   * consider it's position when inserting new elements.
+   * consider its position when inserting new elements.
    */
   let cursor = 0;
 
   for (let i = 0; i < len; i++) {
 
-    let oldChild = arr[i];
+    const oldChild = arr[i];
 
     if (oldChild && order[i] === undefined) {
       removeNode(oldChild);
@@ -51,11 +64,11 @@ export default function reorder_nodes(parent, current, order) {
       cursor += 1;
     }
 
-    let newChildIndex = map[i];
-    let ref = current.childNodes[(i + cursor - 1)];
+    const newChildIndex = map[i];
+    const ref = current.childNodes[(i + cursor)];
 
     if (newChildIndex !== undefined) {
-      let node = arr[newChildIndex];
+      const node = arr[newChildIndex];
       if (node && !ref) {
         current.appendChild(node);
       } else if (node && ref !== node) {

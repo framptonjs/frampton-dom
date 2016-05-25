@@ -7,5 +7,7 @@
  * @param {String} text New text to display
  */
 export default function update_text(node, text) {
-  node.textContent = text;
+  if (node && node.textContent) {
+    node.textContent = text;
+  }
 }

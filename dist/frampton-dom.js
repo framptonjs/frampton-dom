@@ -392,19 +392,14 @@ define('frampton-dom/diff', ['exports', 'module', 'frampton-utils/is_defined', '
     return [patch];
   }
 });
-define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-events/get_document_signal', 'frampton-events/contains', 'frampton-utils/immediate', 'frampton-dom/events/event_map', 'frampton-dom/events/utils/node_gate'], function (exports, _framptonEventsGet_document_signal, _framptonEventsContains, _framptonUtilsImmediate, _framptonDomEventsEvent_map, _framptonDomEventsUtilsNode_gate) {
+define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-utils/immediate', 'frampton-dom/events/event_map', 'frampton-dom/events/utils/node_gate'], function (exports, _framptonUtilsImmediate, _framptonDomEventsEvent_map, _framptonDomEventsUtilsNode_gate) {
   'use strict';
 
   exports.__esModule = true;
   exports.addEvent = addEvent;
   exports.removeEvent = removeEvent;
-  exports.removeEvents = removeEvents;
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-  var _getDocumentSignal = _interopRequireDefault(_framptonEventsGet_document_signal);
-
-  var _eventContains = _interopRequireDefault(_framptonEventsContains);
 
   var _immediate = _interopRequireDefault(_framptonUtilsImmediate);
 
@@ -413,183 +408,41 @@ define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-events/get_
   var _nodeGate = _interopRequireDefault(_framptonDomEventsUtilsNode_gate);
 
   /**
-  
-      {
-        signal : Signal,
-        nodes : [{
-          node : node,
-          handler : handler
-        }]
-      }
-  
+   * @name addEvent
+   * @method
+   * @memberof Frampton.DOM.events
+   * @private
+   * @param {String} name
+   * @param {Element} node
+   * @param {Function} handler
    */
-  var signalMap = {};
-
-  /**
-  
-      {
-        node : node,
-        events : ['click', 'focus']
-      }
-  
-   */
-  var nodeList = [];
-
-  function removeNodeFromMap(name, node) {
-    var entry = signalMap[name];
-    if (entry) {
-      var nodes = entry.nodes;
-      var len = nodes.length;
-      for (var i = 0; i < len; i++) {
-        if (nodes[i].node === node) {
-          nodes.splice(i, 1);
-          return;
-        }
-      }
-    }
-  }
-
-  function removeEventFromNode(name, node) {
-    var len = nodeList.length;
-    for (var i = 0; i < len; i++) {
-      var nodeEntry = nodeList[i];
-      if (nodeEntry.node === node) {
-        var events = nodeEntry.events;
-        var index = events.indexOf(name);
-        if (index > -1) {
-          events.splice(index, 1);
-          if (events.length === 0) {
-            nodeList.splice(i, 1);
-          }
-          return;
-        }
-      }
-    }
-  }
-
-  function getNodeListEntry(node) {
-    var len = nodeList.length;
-    for (var i = 0; i < len; i++) {
-      var handler = nodeList[i];
-      if (handler.node === node) {
-        return [handler, i];
-      }
-    }
-    return null;
-  }
-
-  function removeEventsFromNode(node) {
-    var nodeListEntry = getNodeListEntry(node);
-    if (nodeListEntry) {
-      var index = nodeListEntry[1];
-      var events = nodeListEntry[0].events;
-      var len = events.length;
-      for (var i = 0; i < len; i++) {
-        removeNodeFromMap(events[i], node);
-      }
-      nodeList.splice(index, 1);
-    }
-  }
-
-  function childLength(node) {
-    if (node && node.childNodes) {
-      return node.childNodes.length;
-    } else {
-      return 0;
-    }
-  }
-
-  function removeEventsFromTree(node) {
-    var childLen = childLength(node);
-    for (var i = 0; i < childLen; i++) {
-      var child = node.childNodes[i];
-      removeEventsFromTree(child);
-    }
-    removeEventsFromNode(node);
-  }
-
-  function getEntry(nodes, node) {
-    var len = nodes.length;
-    for (var i = 0; i < len; i++) {
-      var entry = nodes[i];
-      if (entry.node === node) {
-        return entry;
-      }
-    }
-    return null;
-  }
-
-  function getSignal(name, nodes) {
-    var signal = _getDocumentSignal['default'](name).map(function (evt) {
-      var len = nodes.length;
-      for (var i = 0; i < len; i++) {
-        if (_eventContains['default'](nodes[i].node, evt)) {
-          nodes[i].handler(evt);
-        }
-      }
-    });
-
-    return signal;
-  }
-
-  function addEventToNode(name, node) {
-    var entry = getNodeListEntry(node);
-    if (!entry) {
-      nodeList.push({
-        node: node,
-        events: [name]
-      });
-    } else {
-      if (entry[0].events.indexOf(name) === -1) {
-        entry[0].events.push(name);
-      }
-    }
-  }
 
   function addEvent(name, node, handler) {
     name = _EVENT_MAP['default'][name] || name;
     _immediate['default'](function () {
 
-      var events = signalMap[name];
-
-      if (!events) {
-        var nodes = [];
-        events = signalMap[name] = {
-          signal: getSignal(name, nodes),
-          nodes: nodes
-        };
-      }
-
-      var entry = getEntry(events.nodes, node);
-
+      // Transitionend events will not be fired for child nodes. The event must occur on this node.
       if (name === 'transitionend') {
         handler = _nodeGate['default'](node, handler);
       }
 
-      if (!entry) {
-        events.nodes.push({
-          node: node,
-          handler: handler
-        });
-      } else {
-        entry.handler = handler;
-      }
-
-      addEventToNode(name, node);
+      node['on' + name] = handler;
     });
   }
+
+  /**
+   * @name removeEvent
+   * @method
+   * @memberof Frampton.DOM.events
+   * @private
+   * @param {String} name
+   * @param {Element} node
+   */
 
   function removeEvent(name, node) {
     name = _EVENT_MAP['default'][name] || name;
     _immediate['default'](function () {
-      removeNodeFromMap(name, node);
-      removeEventFromNode(name, node);
-    });
-  }
-
-  function removeEvents(node) {
-    _immediate['default'](function () {
-      removeEventsFromTree(node);
+      node['on' + name] = null;
     });
   }
 });
@@ -1356,11 +1209,7 @@ define('frampton-dom/ops/insert_node', ['exports', 'module', 'frampton-dom/ops/c
     }
   }
 });
-define('frampton-dom/ops/remove_node', ['exports', 'module', 'frampton-dom/events/event_dispatcher'], function (exports, module, _framptonDomEventsEvent_dispatcher) {
-  'use strict';
-
-  module.exports = remove_node;
-
+define("frampton-dom/ops/remove_node", ["exports", "module"], function (exports, module) {
   /*
    * @name removeNode
    * @memberOf Frampton.DOM
@@ -1368,12 +1217,16 @@ define('frampton-dom/ops/remove_node', ['exports', 'module', 'frampton-dom/event
    * @private
    * @param {Element} node
    */
+  "use strict";
+
+  module.exports = remove_node;
 
   function remove_node(node) {
-    var parent = node.parentNode;
-    if (parent) {
-      _framptonDomEventsEvent_dispatcher.removeEvents(node);
-      parent.removeChild(node);
+    if (node && node.parentNode) {
+      var _parent = node.parentNode;
+      if (_parent) {
+        _parent.removeChild(node);
+      }
     }
   }
 });
@@ -1404,12 +1257,25 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'module', 'frampton-dom/uti
     var children = current.childNodes;
     var len = children.length;
     var arr = [];
+    var remove = [];
     var map = [];
 
     // Child nodes in original order.
     for (var i = 0; i < len; i++) {
       var child = children[i];
-      arr.push(child);
+      if (child.nodeType === 1 && child.getAttribute('data-transition-out') === 'true') {
+        remove.push(child);
+      } else {
+        arr.push(child);
+      }
+    }
+
+    /**
+     * Because transitions are applied asyncronously it is possible
+     */
+    for (var i = 0; i < remove.length; i++) {
+      var child = remove[i];
+      _removeNode['default'](child);
     }
 
     // Easy look up for what new indexes should be
@@ -1423,7 +1289,7 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'module', 'frampton-dom/uti
     /**
      * Cursor is used to keep our position when dealing with nodes that are
      * transitioning out, therefore still in the DOM but we don't want to
-     * consider it's position when inserting new elements.
+     * consider its position when inserting new elements.
      */
     var cursor = 0;
 
@@ -1441,7 +1307,7 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'module', 'frampton-dom/uti
       }
 
       var newChildIndex = map[i];
-      var ref = current.childNodes[i + cursor - 1];
+      var ref = current.childNodes[i + cursor];
 
       if (newChildIndex !== undefined) {
         var node = arr[newChildIndex];
@@ -1475,11 +1341,13 @@ define('frampton-dom/ops/replace_node', ['exports', 'module', 'frampton-dom/ops/
    */
 
   function replace_node(oldNode, vnode) {
-    var parent = oldNode.parentNode;
-    var newNode = _createElement['default'](vnode);
-    if (parent) {
-      _framptonDomEventsEvent_dispatcher.removeEvents(oldNode);
-      parent.replaceChild(newNode, oldNode);
+    if (oldNode) {
+      var _parent = oldNode.parentNode;
+      var newNode = _createElement['default'](vnode);
+      if (_parent) {
+        _framptonDomEventsEvent_dispatcher.removeEvents(oldNode);
+        _parent.replaceChild(newNode, oldNode);
+      }
     }
   }
 });
@@ -1497,7 +1365,9 @@ define("frampton-dom/ops/update_text", ["exports", "module"], function (exports,
   module.exports = update_text;
 
   function update_text(node, text) {
-    node.textContent = text;
+    if (node && node.textContent) {
+      node.textContent = text;
+    }
   }
 });
 define('frampton-dom/update', ['exports', 'module', 'frampton-dom/diff', 'frampton-dom/ops/apply_patch'], function (exports, module, _framptonDomDiff, _framptonDomOpsApply_patch) {

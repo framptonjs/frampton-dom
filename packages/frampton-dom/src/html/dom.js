@@ -165,7 +165,6 @@ export const source = (attrs, children) => {
   return vnode('source', attrs, children);
 };
 
-
 export const figure = (attrs, children) => {
   return vnode('figure', attrs, children);
 };

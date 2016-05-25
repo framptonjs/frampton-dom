@@ -10,10 +10,12 @@ import { removeEvents } from 'frampton-dom/events/event_dispatcher';
  * @param {VirtualNode} vnode VirtualNode representing replacement
  */
 export default function replace_node(oldNode, vnode) {
-  const parent = oldNode.parentNode;
-  const newNode = createElement(vnode);
-  if (parent) {
-    removeEvents(oldNode);
-    parent.replaceChild(newNode, oldNode);
+  if (oldNode) {
+    const parent = oldNode.parentNode;
+    const newNode = createElement(vnode);
+    if (parent) {
+      removeEvents(oldNode);
+      parent.replaceChild(newNode, oldNode);
+    }
   }
 }
