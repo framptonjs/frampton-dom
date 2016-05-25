@@ -1,6 +1,6 @@
 {
   "name": "frampton-dom",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A virtual-dom module for frampton.js",
   "scripts": {
     "test": "frampton test",
