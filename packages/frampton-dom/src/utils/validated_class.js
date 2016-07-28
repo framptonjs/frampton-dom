@@ -1,27 +1,33 @@
+import isArray from 'frampton-utils/is_array';
 import isString from 'frampton-utils/is_string';
+import isObject from 'frampton-utils/is_object';
 import notEmpty from 'frampton-dom/utils/not_empty';
 import emptyClass from 'frampton-dom/utils/empty_class';
 
 export default function validated_class(str) {
 
-  if (!str) {
-    return emptyClass();
-  }
-
   if (isString(str)) {
+
     return {
       add : str.split(' ').filter(notEmpty),
       remove : []
     };
-  }
 
-  if (!str.add) {
-    str.add = [];
-  }
+  } else if (isObject(str)) {
 
-  if (!str.remove) {
-    str.remove = [];
-  }
+    let newClass = emptyClass();
 
-  return str;
+    if (isArray(str.add)) {
+      newClass.add = str.add;
+    }
+
+    if (isArray(str.remove)) {
+      newClass.remove = str.remove;
+    }
+
+    return newClass;
+
+  } else {
+    return emptyClass();
+  }
 }

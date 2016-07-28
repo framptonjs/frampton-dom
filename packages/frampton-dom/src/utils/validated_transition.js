@@ -1,45 +1,33 @@
-import normalizedFrame from 'frampton-motion/normalized_frame';
+import normalizedFrame from 'frampton-dom/utils/normalized_frame';
 import validatedClass from 'frampton-dom/utils/validated_class';
-import emptyClass from 'frampton-dom/utils/empty_class';
+import emptyTransition from 'frampton-dom/utils/empty_transition';
 
 export default function validated_transition(desc) {
 
   if (!desc) {
-    return {
-      from : {
-        class : emptyClass(),
-        style : {}
-      },
-      to : {
-        class : emptyClass(),
-        style : {}
-      }
-    };
+    return emptyTransition();
   } else {
 
-    let temp = {
-      from : {},
-      to : {}
-    };
+    const newTransition = emptyTransition();
 
     if (desc.from) {
-      temp.from.class = validatedClass(desc.from.class);
-      temp.from.style = normalizedFrame(desc.from.style || {});
+      newTransition.from.class = validatedClass(desc.from.class);
+      newTransition.from.style = normalizedFrame(desc.from.style || {});
     }
 
     if (desc.to) {
-      temp.to.class = validatedClass(desc.to.class);
-      temp.to.style = normalizedFrame(desc.to.style || {});
+      newTransition.to.class = validatedClass(desc.to.class);
+      newTransition.to.style = normalizedFrame(desc.to.style || {});
     }
 
     if (desc.class) {
-      temp.to.class = validatedClass((desc.class));
+      newTransition.to.class = validatedClass((desc.class));
     }
 
     if (desc.style) {
-      temp.to.style = normalizedFrame(desc.style || {});
+      newTransition.to.style = normalizedFrame(desc.style || {});
     }
 
-    return temp;
+    return newTransition;
   }
 }

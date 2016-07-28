@@ -1,9 +1,9 @@
-var FramptonBuild = require('frampton-build');
-var packages = {
+const FramptonBuild = require('frampton-build');
+const packages = {
   'frampton-dom' : { trees: null }
 }
 
-var build = new FramptonBuild({
+const build = new FramptonBuild({
   name : 'frampton-dom',
   packages : packages
 });

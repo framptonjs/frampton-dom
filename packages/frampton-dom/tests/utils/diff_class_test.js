@@ -2,46 +2,50 @@ import diff from 'frampton-dom/utils/diff_class';
 
 QUnit.module('Frampton.DOM.Utils.diffClass');
 
-QUnit.test('Should correctly diff class strings with removes', function() {
+QUnit.test('Should correctly diff class strings with removes', function(assert) {
   const oldClass = 'one two three four';
   const newClass = 'one two three';
-  const expectedDiff = {
+  const actual = diff(oldClass, newClass);
+  const expected = {
     add : [],
     remove : ['four']
   };
-  deepEqual(diff(oldClass, newClass), expectedDiff);
+  assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff class strings with adds', function() {
+QUnit.test('Should correctly diff class strings with adds', function(assert) {
   const oldClass = 'one two three';
   const newClass = 'one two three four';
-  const expectedDiff = {
+  const actual = diff(oldClass, newClass);
+  const expected = {
     add : ['four'],
     remove : []
   };
-  deepEqual(diff(oldClass, newClass), expectedDiff);
+  assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff class strings with adds and removes', function() {
+QUnit.test('Should correctly diff class strings with adds and removes', function(assert) {
   const oldClass = 'one two three five';
   const newClass = 'one two three four';
-  const expectedDiff = {
+  const actual = diff(oldClass, newClass);
+  const expected = {
     add : ['four'],
     remove : ['five']
   };
-  deepEqual(diff(oldClass, newClass), expectedDiff);
+  assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff objects', function() {
+QUnit.test('Should correctly diff objects', function(assert) {
   const oldClass = {
     add : ['one', 'two', 'three']
   };
   const newClass = {
     add : ['two', 'three']
   };
-  const expectedDiff = {
+  const actual = diff(oldClass, newClass);
+  const expected = {
     add : [],
     remove : ['one']
   };
-  deepEqual(diff(oldClass, newClass), expectedDiff);
+  assert.deepEqual(actual, expected);
 });

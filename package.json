@@ -1,6 +1,6 @@
 {
   "name": "frampton-dom",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A virtual-dom module for frampton.js",
   "scripts": {
     "test": "frampton test",
@@ -18,9 +18,7 @@
   },
   "homepage": "https://github.com/framptonjs/frampton-dom",
   "devDependencies": {
-    "broccoli": "^0.16.2",
-    "broccoli-cli": "^1.0.0",
-    "frampton-build": "*",
-    "qunitjs": "^1.16.0"
+    "frampton-build": "0.0.5",
+    "frampton-cli": "0.0.4"
   }
 }

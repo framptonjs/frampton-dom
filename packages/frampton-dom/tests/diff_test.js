@@ -4,25 +4,28 @@ import { div, article, ul, li, p, text } from 'frampton-dom/html/dom';
 
 QUnit.module('Frampton.DOM.diff');
 
-QUnit.test('Should return empty array for no diff', function() {
+QUnit.test('Should return empty array for no diff', function(assert) {
   const div_1 = div({ key : 'id-1' }, []);
   const div_2 = div({ key : 'id-1' }, []);
+  const actual = diff(div_1, div_2);
   const expected = [[]];
 
-  deepEqual(diff(div_1, div_2), expected);
+  assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should return empty array for same reference', function() {
+QUnit.test('Should return empty array for same reference', function(assert) {
   const div_1 = div({ key : 'id-1' }, []);
+  const actual = diff(div_1, div_1);
   const expected = [[]];
 
-  deepEqual(diff(div_1, div_1), expected);
+  assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff two unkeyed divs', function() {
+QUnit.test('Should correctly diff two unkeyed divs', function(assert) {
 
   const div_1 = div({}, []);
   const div_2 = div({}, [ div() ]);
+  const actual = diff(div_1, div_2);
   const expected = [];
   expected._p = {
     ctor : 'VirtualPatch',
@@ -55,10 +58,10 @@ QUnit.test('Should correctly diff two unkeyed divs', function() {
     }
   };
 
-  deepEqual(diff(div_1, div_2), [expected]);
+  assert.deepEqual(actual, [expected]);
 });
 
-QUnit.test('Should correctly diff two nested lists', function() {
+QUnit.test('Should correctly diff two nested lists', function(assert) {
 
   const div_1 = div({ key : 'div-1' }, [
     article({ key : 'main-content' }, [
@@ -174,5 +177,7 @@ QUnit.test('Should correctly diff two nested lists', function() {
     update : [1]
   };
 
-  deepEqual(diff(div_1, div_2), [expected]);
+  const actual = diff(div_1, div_2);
+
+  assert.deepEqual(actual, [expected]);
 });

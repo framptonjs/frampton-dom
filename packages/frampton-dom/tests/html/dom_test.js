@@ -2,8 +2,8 @@ import { div, h1, text } from 'frampton-dom/html/dom';
 
 QUnit.module('Frampton.DOM.Html');
 
-QUnit.test('Should corectly construct a VirtualNode', function() {
-  const test = div({}, []);
+QUnit.test('Should corectly construct a VirtualNode', function(assert) {
+  const actual = div({}, []);
   const expected = {
     ctor : 'VirtualNode',
     id : undefined,
@@ -13,11 +13,11 @@ QUnit.test('Should corectly construct a VirtualNode', function() {
     children : [],
     length : 0
   };
-  deepEqual(test, expected);
+  assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should corectly assign defaults', function() {
-  const test = div();
+QUnit.test('Should corectly assign defaults', function(assert) {
+  const actual = div();
   const expected = {
     ctor : 'VirtualNode',
     id : undefined,
@@ -27,11 +27,11 @@ QUnit.test('Should corectly assign defaults', function() {
     children : [],
     length : 0
   };
-  deepEqual(test, expected);
+  assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should corectly handle children', function() {
-  const test = div({}, [ h1({}, [ text('test') ]) ]);
+QUnit.test('Should corectly handle children', function(assert) {
+  const actual = div({}, [ h1({}, [ text('test') ]) ]);
   const expected = {
     ctor : 'VirtualNode',
     id : undefined,
@@ -56,5 +56,5 @@ QUnit.test('Should corectly handle children', function() {
     ],
     length : 1
   };
-  deepEqual(test, expected);
+  assert.deepEqual(actual, expected);
 });

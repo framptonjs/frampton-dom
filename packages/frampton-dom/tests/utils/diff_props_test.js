@@ -2,7 +2,7 @@ import diff from 'frampton-dom/utils/diff_props';
 
 QUnit.module('Frampton.DOM.Utils.diffProps');
 
-QUnit.test('Should correctly diff two objects', function() {
+QUnit.test('Should correctly diff two objects', function(assert) {
   const oldProps = {
     one : 'one',
     two : 'two',
@@ -13,15 +13,16 @@ QUnit.test('Should correctly diff two objects', function() {
     three : 'three',
     four : 'four'
   };
-  const expectedDiff = {
+  const actual = diff(oldProps, newProps);
+  const expected = {
     one : 'one two',
     two : undefined,
     four : 'four'
   };
-  deepEqual(diff(oldProps, newProps), expectedDiff);
+  assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff nested objects', function() {
+QUnit.test('Should correctly diff nested objects', function(assert) {
   const oldProps = {
     one : 'one',
     two : {
@@ -40,7 +41,8 @@ QUnit.test('Should correctly diff nested objects', function() {
     },
     four : 'four'
   };
-  const expectedDiff = {
+  const actual = diff(oldProps, newProps);
+  const expected = {
     one : 'one two',
     two : undefined,
     three : {
@@ -50,10 +52,10 @@ QUnit.test('Should correctly diff nested objects', function() {
     },
     four : 'four'
   };
-  deepEqual(diff(oldProps, newProps), expectedDiff);
+  assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff transitions', function() {
+QUnit.test('Should correctly diff transitions', function(assert) {
   const oldProps = {
     transition : {
       class : 'walk on',
@@ -70,7 +72,8 @@ QUnit.test('Should correctly diff transitions', function() {
       }
     }
   };
-  const expectedDiff = {
+  const actual = diff(oldProps, newProps);
+  const expected = {
     transition : {
       to : {
         class : {
@@ -85,5 +88,5 @@ QUnit.test('Should correctly diff transitions', function() {
     }
   };
 
-  deepEqual(diff(oldProps, newProps), expectedDiff);
+  assert.deepEqual(actual, expected);
 });

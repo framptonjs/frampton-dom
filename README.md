@@ -1,1 +1,1 @@
-# Frampton-DOM v0.0.4
+# Frampton-DOM v0.0.6
