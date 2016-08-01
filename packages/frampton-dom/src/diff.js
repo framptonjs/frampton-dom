@@ -26,8 +26,12 @@ function indexesMatch(oldIndex, newIndex) {
 
 function diffTrees(oldTree, newTree) {
   var patch, newPatch;
+
+  // Same reference, no need to do anything
   if (oldTree === newTree) {
     return;
+
+  // New tree is a valid node
   } else if (isNode(newTree)) {
     if (isNode(oldTree)) {
       if (isSameNode(oldTree, newTree)) {
@@ -42,6 +46,8 @@ function diffTrees(oldTree, newTree) {
     } else {
       newPatch = insert(null, newTree);
     }
+
+  // Ooops, tree isn't a valid node
   } else {
     throw new Error('Root of DOM should be a VirtualNode');
   }
