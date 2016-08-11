@@ -11,22 +11,31 @@ function executePatch(patch, parentNode, currentNode) {
   const type = patch.type;
   const update = patch.update;
   switch (patch.type) {
+    
     case PATCHES.NONE:
       break;
+
     case PATCHES.APPEND:
       return insertNode(parentNode, null, update);
+
     case PATCHES.INSERT:
       return insertNode(parentNode, currentNode, update);
+
     case PATCHES.REMOVE:
       return removeNode(currentNode);
+
     case PATCHES.REPLACE:
       return replaceNode(currentNode, update);
+
     case PATCHES.PROPS:
       return applyAttributes(currentNode, update);
+
     case PATCHES.TEXT:
       return updateText(currentNode, update);
+
     case PATCHES.REORDER:
       return reorderNodes(parentNode, currentNode, update);
+
     default:
       throw new Error('Unrecognized patch type: ' + type);
   }

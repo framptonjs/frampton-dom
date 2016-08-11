@@ -69,6 +69,33 @@ const attributes = {
 const el = div(attributes, [ text('hello') ]);
 ```
 
+Transitions can take several forms. In the above code the given classes are added at the appropriate time, when adding or removing the elements form the DOM. You can describe more exact transitions.
+
+```
+const transition = {
+  from : {
+    class : {
+      remove : ['class-to-remove'],
+      add : ['class-to-add']
+    },
+    style : {
+      height : '100px'
+    }
+  },
+  to : {
+    class : {
+      add : ['more-to-add']
+    },
+    style : {
+      height : '0px',
+      duration : '300ms'
+    }
+  }
+}
+```
+
+If you pass a string to the 'class' key it is assumed to be class(es) to add. The 'from' block is used to reset the element before the transition is run. The 'from' and 'to' blocks are optional. If you don't use the 'from' and 'to' blocks the transition you describe is essentially a 'to' block without a 'from' block.
+
 
 ## Rendering
 
@@ -85,6 +112,26 @@ const newTree = div({ class : 'test' }, [ text('hello') ]);
 // old virtual DOM to diff against and the new virtual DOM to apply.
 // Initially we don't have an old tree.
 update(rootElement, null, newTree);
+```
+
+## Scenes
+
+Usually you'll want to use the scene function to schedule your updates. A virtual DOM scene is an abstraction above the update function. You give the scene function a root node to attach the scene to and it returns a function to schedule updates of that scene. It will hold a reference to the existing virtual DOM tree in order to perform diffs. The scheduler function returned schedules updates to the DOM based on requestAnimationFrame. If you request more than one update before the next animation frame it will only run one update, the last one requested. This essentially throttles your updates to only run the needed updates so you don't have to worry about optimizing your code.
+
+```
+const scene = Frampton.DOM.scene;
+const { div, text } = Frampton.DOM.Html;
+const rootElement = document.body;
+
+const scheduler = scene(rootElement);
+
+const tree = div({ class : 'test' }, [ text('hello') ]);
+
+scheduler(tree);
+
+const newTree = div({ class : 'test' }, [ text('hello world') ]);
+
+scheduler(newTree);
 ```
 
 

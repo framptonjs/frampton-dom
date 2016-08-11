@@ -13,7 +13,7 @@ var global = this;
   require = Frampton.__loader.require;
 
 }());
-define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom/update', 'frampton-dom/html/dom'], function (_namespace, _diff, _update, _dom) {
+define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom/update', 'frampton-dom/scene', 'frampton-dom/html/dom'], function (_namespace, _diff, _update, _scene, _dom) {
   'use strict';
 
   var _namespace2 = _interopRequireDefault(_namespace);
@@ -21,6 +21,8 @@ define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom
   var _diff2 = _interopRequireDefault(_diff);
 
   var _update2 = _interopRequireDefault(_update);
+
+  var _scene2 = _interopRequireDefault(_scene);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -37,6 +39,7 @@ define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom
   _namespace2.default.DOM.VERSION = '0.0.7';
   _namespace2.default.DOM.diff = _diff2.default;
   _namespace2.default.DOM.update = _update2.default;
+  _namespace2.default.DOM.scene = _scene2.default;
 
   /**
    * @name Html
@@ -979,22 +982,31 @@ define('frampton-dom/ops/apply_patch', ['exports', 'frampton-utils/is_defined', 
     var type = patch.type;
     var update = patch.update;
     switch (patch.type) {
+
       case _patch_types2.default.NONE:
         break;
+
       case _patch_types2.default.APPEND:
         return (0, _insert_node2.default)(parentNode, null, update);
+
       case _patch_types2.default.INSERT:
         return (0, _insert_node2.default)(parentNode, currentNode, update);
+
       case _patch_types2.default.REMOVE:
         return (0, _remove_node2.default)(currentNode);
+
       case _patch_types2.default.REPLACE:
         return (0, _replace_node2.default)(currentNode, update);
+
       case _patch_types2.default.PROPS:
         return (0, _apply_attributes2.default)(currentNode, update);
+
       case _patch_types2.default.TEXT:
         return (0, _update_text2.default)(currentNode, update);
+
       case _patch_types2.default.REORDER:
         return (0, _reorder_nodes2.default)(parentNode, currentNode, update);
+
       default:
         throw new Error('Unrecognized patch type: ' + type);
     }
@@ -1404,6 +1416,70 @@ define("frampton-dom/ops/update_text", ["exports"], function (exports) {
     if (node && node.textContent) {
       node.textContent = text;
     }
+  }
+});
+define('frampton-dom/scene', ['exports', 'frampton-dom/utils/request_frame', 'frampton-dom/update'], function (exports, _request_frame, _update) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = scene;
+
+  var _request_frame2 = _interopRequireDefault(_request_frame);
+
+  var _update2 = _interopRequireDefault(_update);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  var STATES = {
+    NOTHING: 0,
+    PENDING: 1
+  };
+
+  /**
+   * Start a new VirtualDOM scene. The scene takes a root node to attach
+   * to and returns a function to schedule updates. You give the scheduler
+   * a new VirtualNode and it will schedule the diff and update of the
+   * previous DOM.
+   *
+   * @name scene
+   * @memberof Frampton.DOM
+   * @method
+   * @param {Element} rootNode The node to attach our scene to
+   * @returns {Function} A function to schedule updates
+   */
+  function scene(rootNode) {
+
+    var savedDOM = null;
+    var scheduledDOM = null;
+    var state = STATES.NOTHING;
+
+    function draw() {
+      (0, _update2.default)(rootNode, savedDOM, scheduledDOM);
+      savedDOM = scheduledDOM;
+      state = STATES.NOTHING;
+    }
+
+    return function scheduler(dom) {
+      scheduledDOM = dom;
+
+      switch (state) {
+
+        case STATES.NOTHING:
+          (0, _request_frame2.default)(draw);
+          state = STATES.PENDING;
+          break;
+
+        default:
+          state = STATES.PENDING;
+          break;
+      }
+    };
   }
 });
 define('frampton-dom/update', ['exports', 'frampton-dom/diff', 'frampton-dom/ops/apply_patch'], function (exports, _diff, _apply_patch) {
@@ -1827,6 +1903,29 @@ define("frampton-dom/utils/reflow", ["exports"], function (exports) {
    */
   function reflow(element) {
     return element.offsetWidth;
+  }
+});
+define('frampton-dom/utils/request_frame', ['exports', 'frampton-utils/is_function'], function (exports, _is_function) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  exports.default = function (callback) {
+    if ((0, _is_function2.default)(window.requestAnimationFrame)) {
+      window.requestAnimationFrame(callback);
+    } else {
+      setTimeout(callback, 1000 / 60);
+    }
+  };
+
+  var _is_function2 = _interopRequireDefault(_is_function);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
   }
 });
 define('frampton-dom/utils/transition_in', ['exports', 'frampton-dom/ops/apply_transition', 'frampton-dom/utils/validated_transition'], function (exports, _apply_transition, _validated_transition) {
