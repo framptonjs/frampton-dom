@@ -32,7 +32,7 @@ Each function, with the exception of text, takes two parameters. The first param
 
 ### Events
 
-Adding event listeners is done declaratively.\
+Adding event listeners is done declaratively.
 
 ```
 const { div, text } = Frampton.DOM.Html;
@@ -88,9 +88,9 @@ update(rootElement, null, newTree);
 ```
 
 
-## Diffing
+## Finding the Difference in Trees
 
-Finding the diff between objects can be expensive. We try not to run a diff if we don't have to. It two nodes are the same reference they are assumed to be the same and no changes are made. In fact we only go through the expense of diffing all the keys in a node if we are alerted that they are intended to be the same node. To indicate that nodes in two virtual DOM trees are intended to be the same they must have the same id or the same key. Id is the usual DOM attribute and will be applied to the resulting DOM node. Key is a special parameter that will not be applied to the result DOM node. It is only used for diffing purposes.
+Finding the diff between objects can be expensive. We try not to run a diff if we don't have to. If two nodes are the same reference they are assumed to be the same and no changes are made. In fact we only go through the expense of diffing all the keys in a node if we are alerted that they are intended to be the same node. If two nodes are different references and there is no indication that they are meant to represent the same DOM node we replace the old node with the new node. To indicate that nodes in two virtual DOM trees are intended to be the same they must have the same id or the same key. Id is the usual DOM attribute and will be applied to the resulting DOM node. Key is a special parameter that will not be applied to the result DOM node. It is only used for diffing purposes.
 
 ```
 const update = Frampton.DOM.update;
