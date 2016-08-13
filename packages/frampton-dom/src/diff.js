@@ -168,14 +168,12 @@ function diffChildren(oldNode, newNode) {
       // Old node was text
       if (isText(oldChild)) {
 
+        // Both node are text, index is the same
+        orderMap[i] = i;
+
         // Text nodes are the same if they have same text, duh.
         if (oldChild.text !== newChild.text) {
-          orderMap[i] = i;
           newPatch = text(oldChild, newChild.text);
-
-        // Yup, the same.
-        } else {
-          orderMap[i] = i;
         }
 
       // Old node was a node

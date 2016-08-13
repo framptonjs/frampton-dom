@@ -1,3 +1,4 @@
+import isNumber from 'frampton-utils/is_number';
 import isPatch from 'frampton-dom/utils/is_patch';
 import removeNode from 'frampton-dom/ops/remove_node';
 import transitionOut from 'frampton-dom/utils/transition_out';
@@ -18,9 +19,13 @@ export default function reorder_nodes(parent, current, order) {
   const remove = [];
   const map = [];
 
-  // Child nodes in original order.
+  /**
+   * If child nodes were still transitioning out from a previous invokation of
+   * reorderNodes they will not be in our diff and need to be removed. Otherwise
+   * we collect a reference to the children in their original order.
+   */
   for (let i = 0; i < len; i++) {
-    let child = children[i];
+    const child = children[i];
     if (child.nodeType === 1 && child.getAttribute('data-transition-out') === 'true') {
       remove.push(child);
     } else {
@@ -29,17 +34,18 @@ export default function reorder_nodes(parent, current, order) {
   }
 
   /**
-   * Because transitions are applied asyncronously it is possible
+   * Because transitions are applied asyncronously it is possible for nodes
+   * transitioning out to still be in the DOM but not in our virtual DOM.
    */
   for (let i = 0; i < remove.length; i++) {
-    let child = remove[i];
+    const child = remove[i];
     removeNode(child);
   }
 
   // Easy look up for what new indexes should be
   for (let i = 0; i < order.length; i++) {
-    let next = order[i];
-    if (next !== undefined && !isPatch(next)) {
+    const next = order[i];
+    if (isNumber(next)) {
       map[next] = i;
     }
   }
@@ -69,10 +75,16 @@ export default function reorder_nodes(parent, current, order) {
 
     if (newChildIndex !== undefined) {
       const node = arr[newChildIndex];
+
+      // We have a new node, but no old node at this position.
       if (node && !ref) {
         current.appendChild(node);
+
+      // We have an old node here, insert the new node before it.
       } else if (node && ref !== node) {
         current.insertBefore(node, ref);
+
+      // Things stay the same.
       } else if (node && ref === node) {
         /* No move */
       }

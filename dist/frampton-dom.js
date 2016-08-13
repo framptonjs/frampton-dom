@@ -36,7 +36,7 @@ define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom
    * @memberof Frampton
    */
   _namespace2.default.DOM = {};
-  _namespace2.default.DOM.VERSION = '0.0.7';
+  _namespace2.default.DOM.VERSION = '0.0.8';
   _namespace2.default.DOM.diff = _diff2.default;
   _namespace2.default.DOM.update = _update2.default;
   _namespace2.default.DOM.scene = _scene2.default;
@@ -298,14 +298,12 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
         // Old node was text
         if ((0, _is_text2.default)(oldChild)) {
 
+          // Both node are text, index is the same
+          orderMap[_i2] = _i2;
+
           // Text nodes are the same if they have same text, duh.
           if (oldChild.text !== newChild.text) {
-            orderMap[_i2] = _i2;
             newPatch = (0, _patch.text)(oldChild, newChild.text);
-
-            // Yup, the same.
-          } else {
-            orderMap[_i2] = _i2;
           }
 
           // Old node was a node
@@ -892,9 +890,14 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
         if ((0, _is_event2.default)(name)) {
           (0, _event_dispatcher.removeEvent)(name, node);
         } else {
-          node.removeAttribute(name);
+          if (name === 'focus') {
+            node.removeAttribute('data-fr-dom-focus');
+          } else {
+            node.removeAttribute(name);
+          }
         }
       } else {
+
         if (name === 'style') {
           if ((0, _is_object2.default)(value)) {
             (0, _apply_styles2.default)(node, value);
@@ -905,6 +908,8 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
           (0, _apply_transition2.default)(node, (0, _validated_transition2.default)(value));
         } else if (name === 'class') {
           (0, _apply_classes2.default)(node, (0, _validated_class2.default)(value));
+        } else if (name === 'focus') {
+          node.setAttribute('data-fr-dom-focus', value);
         } else if ((0, _is_event2.default)(name)) {
           (0, _event_dispatcher.addEvent)(name, node, value);
         } else if (!(0, _contains2.default)(properties, name)) {
@@ -948,29 +953,15 @@ define("frampton-dom/ops/apply_classes", ["exports"], function (exports) {
     }
   }
 });
-define('frampton-dom/ops/apply_patch', ['exports', 'frampton-utils/is_defined', 'frampton-dom/virtual/patch_types', 'frampton-dom/ops/apply_attributes', 'frampton-dom/ops/remove_node', 'frampton-dom/ops/replace_node', 'frampton-dom/ops/reorder_nodes', 'frampton-dom/ops/insert_node', 'frampton-dom/ops/update_text'], function (exports, _is_defined, _patch_types, _apply_attributes, _remove_node, _replace_node, _reorder_nodes, _insert_node, _update_text) {
+define('frampton-dom/ops/apply_globals', ['exports', 'frampton-utils/is_something'], function (exports, _is_something) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.default = apply_patch;
+  exports.default = apply_globals;
 
-  var _is_defined2 = _interopRequireDefault(_is_defined);
-
-  var _patch_types2 = _interopRequireDefault(_patch_types);
-
-  var _apply_attributes2 = _interopRequireDefault(_apply_attributes);
-
-  var _remove_node2 = _interopRequireDefault(_remove_node);
-
-  var _replace_node2 = _interopRequireDefault(_replace_node);
-
-  var _reorder_nodes2 = _interopRequireDefault(_reorder_nodes);
-
-  var _insert_node2 = _interopRequireDefault(_insert_node);
-
-  var _update_text2 = _interopRequireDefault(_update_text);
+  var _is_something2 = _interopRequireDefault(_is_something);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -978,93 +969,36 @@ define('frampton-dom/ops/apply_patch', ['exports', 'frampton-utils/is_defined', 
     };
   }
 
-  function executePatch(patch, parentNode, currentNode) {
-    var type = patch.type;
-    var update = patch.update;
-    switch (patch.type) {
-
-      case _patch_types2.default.NONE:
-        break;
-
-      case _patch_types2.default.APPEND:
-        return (0, _insert_node2.default)(parentNode, null, update);
-
-      case _patch_types2.default.INSERT:
-        return (0, _insert_node2.default)(parentNode, currentNode, update);
-
-      case _patch_types2.default.REMOVE:
-        return (0, _remove_node2.default)(currentNode);
-
-      case _patch_types2.default.REPLACE:
-        return (0, _replace_node2.default)(currentNode, update);
-
-      case _patch_types2.default.PROPS:
-        return (0, _apply_attributes2.default)(currentNode, update);
-
-      case _patch_types2.default.TEXT:
-        return (0, _update_text2.default)(currentNode, update);
-
-      case _patch_types2.default.REORDER:
-        return (0, _reorder_nodes2.default)(parentNode, currentNode, update);
-
-      default:
-        throw new Error('Unrecognized patch type: ' + type);
+  function apply_globals(root) {
+    var focused = root.querySelector('[data-fr-dom-focus="true"]');
+    if ((0, _is_something2.default)(focused) && focused.nodeType === 1) {
+      console.log('focused: ', focused);
+      focused.focus();
     }
   }
+});
+define('frampton-dom/ops/apply_patch', ['exports', 'frampton-utils/is_numeric', 'frampton-dom/utils/node_at_index', 'frampton-dom/ops/execute_patch', 'frampton-dom/ops/perform_inserts', 'frampton-dom/ops/reset_child_state'], function (exports, _is_numeric, _node_at_index, _execute_patch, _perform_inserts, _reset_child_state) {
+  'use strict';
 
-  function isNumeric(obj) {
-    return !isNaN(obj);
-  }
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = apply_patch;
 
-  function nodeAtIndex(node, index) {
-    if (node && node.childNodes) {
-      return node.childNodes[index] || null;
-    } else {
-      return null;
-    }
-  }
+  var _is_numeric2 = _interopRequireDefault(_is_numeric);
 
-  /**
-   * Nodes that are transitioning out should just be removed to get us in a good
-   * state before performing the next set of updates.
-   */
-  function resetChildState(node) {
-    if (node && node.childNodes) {
-      var children = node.childNodes;
-      var len = children.length;
-      for (var i = 0; i < len; i++) {
-        var child = children[i];
-        if ((0, _is_defined2.default)(child) && child.nodeType === 1 && child.getAttribute('data-transition-out') === 'true') {
-          (0, _remove_node2.default)(child);
-        }
-      }
-    }
-  }
+  var _node_at_index2 = _interopRequireDefault(_node_at_index);
 
-  function performInserts(current, patches) {
+  var _execute_patch2 = _interopRequireDefault(_execute_patch);
 
-    var arr = [];
-    var len = current ? current.childNodes.length : 0;
+  var _perform_inserts2 = _interopRequireDefault(_perform_inserts);
 
-    for (var i = 0; i < len; i++) {
-      var child = current.childNodes[i];
-      // Filter out nodes that are transitioning out
-      if (child.nodeType === 3 || child.getAttribute('data-transition-out') !== 'true') {
-        arr.push(child);
-      }
-    }
+  var _reset_child_state2 = _interopRequireDefault(_reset_child_state);
 
-    var cursor = 0;
-
-    for (var key in patches) {
-      if (!isNaN(key)) {
-        var update = patches[key];
-        executePatch(update, current, arr[key - cursor]);
-        if (update.type === _patch_types2.default.INSERT) {
-          cursor += 1;
-        }
-      }
-    }
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
   }
 
   /**
@@ -1075,29 +1009,29 @@ define('frampton-dom/ops/apply_patch', ['exports', 'frampton-utils/is_defined', 
    */
   function apply_patch(patch, parent, current) {
 
-    resetChildState(current);
+    (0, _reset_child_state2.default)(current);
 
     // Apply patches to child nodes
     for (var key in patch) {
-      if (isNumeric(key)) {
-        var child = nodeAtIndex(current, key);
+      if ((0, _is_numeric2.default)(key)) {
+        var child = (0, _node_at_index2.default)(current, key);
         apply_patch(patch[key], current, child);
       }
     }
 
     // Reorder child nodes
     if (patch._o) {
-      executePatch(patch._o, parent, current);
+      (0, _execute_patch2.default)(patch._o, parent, current);
     }
 
     // Insert new nodes
     if (patch._i) {
-      performInserts(current, patch._i);
+      (0, _perform_inserts2.default)(current, patch._i);
     }
 
     // Patch props and text
     if (patch._p) {
-      executePatch(patch._p, parent, current);
+      (0, _execute_patch2.default)(patch._p, parent, current);
     }
   }
 });
@@ -1200,6 +1134,70 @@ define('frampton-dom/ops/create_element', ['exports', 'frampton-dom/utils/is_tex
     return node;
   }
 });
+define('frampton-dom/ops/execute_patch', ['exports', 'frampton-dom/virtual/patch_types', 'frampton-dom/ops/remove_node', 'frampton-dom/ops/replace_node', 'frampton-dom/ops/reorder_nodes', 'frampton-dom/ops/insert_node', 'frampton-dom/ops/update_text', 'frampton-dom/ops/apply_attributes'], function (exports, _patch_types, _remove_node, _replace_node, _reorder_nodes, _insert_node, _update_text, _apply_attributes) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = execute_patch;
+
+  var _patch_types2 = _interopRequireDefault(_patch_types);
+
+  var _remove_node2 = _interopRequireDefault(_remove_node);
+
+  var _replace_node2 = _interopRequireDefault(_replace_node);
+
+  var _reorder_nodes2 = _interopRequireDefault(_reorder_nodes);
+
+  var _insert_node2 = _interopRequireDefault(_insert_node);
+
+  var _update_text2 = _interopRequireDefault(_update_text);
+
+  var _apply_attributes2 = _interopRequireDefault(_apply_attributes);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function execute_patch(patch, parentNode, currentNode) {
+
+    var type = patch.type;
+    var update = patch.update;
+
+    switch (patch.type) {
+
+      case _patch_types2.default.NONE:
+        break;
+
+      case _patch_types2.default.APPEND:
+        return (0, _insert_node2.default)(parentNode, null, update);
+
+      case _patch_types2.default.INSERT:
+        return (0, _insert_node2.default)(parentNode, currentNode, update);
+
+      case _patch_types2.default.REMOVE:
+        return (0, _remove_node2.default)(currentNode);
+
+      case _patch_types2.default.REPLACE:
+        return (0, _replace_node2.default)(currentNode, update);
+
+      case _patch_types2.default.PROPS:
+        return (0, _apply_attributes2.default)(currentNode, update);
+
+      case _patch_types2.default.TEXT:
+        return (0, _update_text2.default)(currentNode, update);
+
+      case _patch_types2.default.REORDER:
+        return (0, _reorder_nodes2.default)(parentNode, currentNode, update);
+
+      default:
+        throw new Error('Unrecognized patch type: ' + type);
+    }
+  }
+});
 define('frampton-dom/ops/insert_node', ['exports', 'frampton-dom/ops/create_element', 'frampton-dom/utils/transition_in'], function (exports, _create_element, _transition_in) {
   'use strict';
 
@@ -1241,6 +1239,59 @@ define('frampton-dom/ops/insert_node', ['exports', 'frampton-dom/ops/create_elem
     }
   }
 });
+define('frampton-dom/ops/perform_inserts', ['exports', 'frampton-utils/is_numeric', 'frampton-dom/virtual/patch_types', 'frampton-dom/ops/execute_patch'], function (exports, _is_numeric, _patch_types, _execute_patch) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = perform_inserts;
+
+  var _is_numeric2 = _interopRequireDefault(_is_numeric);
+
+  var _patch_types2 = _interopRequireDefault(_patch_types);
+
+  var _execute_patch2 = _interopRequireDefault(_execute_patch);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  /**
+   * @name performInserts
+   * @memberof Frampton.DOM.Ops
+   * @private
+   * @param {Element} current
+   * @param {Object} patches
+   */
+  function perform_inserts(current, patches) {
+
+    var arr = [];
+    var len = current ? current.childNodes.length : 0;
+
+    for (var i = 0; i < len; i++) {
+      var child = current.childNodes[i];
+      // Filter out nodes that are transitioning out
+      if (child.nodeType === 3 || child.getAttribute('data-transition-out') !== 'true') {
+        arr.push(child);
+      }
+    }
+
+    var cursor = 0;
+
+    for (var key in patches) {
+      if ((0, _is_numeric2.default)(key)) {
+        var update = patches[key];
+        (0, _execute_patch2.default)(update, current, arr[key - cursor]);
+        if (update.type === _patch_types2.default.INSERT) {
+          cursor += 1;
+        }
+      }
+    }
+  }
+});
 define("frampton-dom/ops/remove_node", ["exports"], function (exports) {
   "use strict";
 
@@ -1264,13 +1315,15 @@ define("frampton-dom/ops/remove_node", ["exports"], function (exports) {
     }
   }
 });
-define('frampton-dom/ops/reorder_nodes', ['exports', 'frampton-dom/utils/is_patch', 'frampton-dom/ops/remove_node', 'frampton-dom/utils/transition_out'], function (exports, _is_patch, _remove_node, _transition_out) {
+define('frampton-dom/ops/reorder_nodes', ['exports', 'frampton-utils/is_number', 'frampton-dom/utils/is_patch', 'frampton-dom/ops/remove_node', 'frampton-dom/utils/transition_out'], function (exports, _is_number, _is_patch, _remove_node, _transition_out) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
   exports.default = reorder_nodes;
+
+  var _is_number2 = _interopRequireDefault(_is_number);
 
   var _is_patch2 = _interopRequireDefault(_is_patch);
 
@@ -1300,7 +1353,11 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'frampton-dom/utils/is_patc
     var remove = [];
     var map = [];
 
-    // Child nodes in original order.
+    /**
+     * If child nodes were still transitioning out from a previous invokation of
+     * reorderNodes they will not be in our diff and need to be removed. Otherwise
+     * we collect a reference to the children in their original order.
+     */
     for (var i = 0; i < len; i++) {
       var child = children[i];
       if (child.nodeType === 1 && child.getAttribute('data-transition-out') === 'true') {
@@ -1311,7 +1368,8 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'frampton-dom/utils/is_patc
     }
 
     /**
-     * Because transitions are applied asyncronously it is possible
+     * Because transitions are applied asyncronously it is possible for nodes
+     * transitioning out to still be in the DOM but not in our virtual DOM.
      */
     for (var _i = 0; _i < remove.length; _i++) {
       var _child = remove[_i];
@@ -1321,7 +1379,7 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'frampton-dom/utils/is_patc
     // Easy look up for what new indexes should be
     for (var _i2 = 0; _i2 < order.length; _i2++) {
       var next = order[_i2];
-      if (next !== undefined && !(0, _is_patch2.default)(next)) {
+      if ((0, _is_number2.default)(next)) {
         map[next] = _i2;
       }
     }
@@ -1351,10 +1409,16 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'frampton-dom/utils/is_patc
 
       if (newChildIndex !== undefined) {
         var node = arr[newChildIndex];
+
+        // We have a new node, but no old node at this position.
         if (node && !ref) {
           current.appendChild(node);
+
+          // We have an old node here, insert the new node before it.
         } else if (node && ref !== node) {
           current.insertBefore(node, ref);
+
+          // Things stay the same.
         } else if (node && ref === node) {
           /* No move */
         }
@@ -1393,6 +1457,45 @@ define('frampton-dom/ops/replace_node', ['exports', 'frampton-dom/ops/create_ele
       if (parent) {
         (0, _event_dispatcher.removeEvents)(oldNode);
         parent.replaceChild(newNode, oldNode);
+      }
+    }
+  }
+});
+define('frampton-dom/ops/reset_child_state', ['exports', 'frampton-utils/is_defined', 'frampton-dom/ops/remove_node'], function (exports, _is_defined, _remove_node) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = reset_child_state;
+
+  var _is_defined2 = _interopRequireDefault(_is_defined);
+
+  var _remove_node2 = _interopRequireDefault(_remove_node);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function isTransitioningOut(child) {
+    return (0, _is_defined2.default)(child) && child.nodeType === 1 && child.getAttribute('data-transition-out') === 'true';
+  }
+
+  /**
+   * Nodes that are transitioning out should just be removed to get us in a good
+   * state before performing the next set of updates.
+   */
+  function reset_child_state(node) {
+    if (node && node.childNodes) {
+      var children = node.childNodes;
+      var len = children.length;
+      for (var i = 0; i < len; i++) {
+        var child = children[i];
+        if (isTransitioningOut(child)) {
+          (0, _remove_node2.default)(child);
+        }
       }
     }
   }
@@ -1482,7 +1585,7 @@ define('frampton-dom/scene', ['exports', 'frampton-dom/utils/request_frame', 'fr
     };
   }
 });
-define('frampton-dom/update', ['exports', 'frampton-dom/diff', 'frampton-dom/ops/apply_patch'], function (exports, _diff, _apply_patch) {
+define('frampton-dom/update', ['exports', 'frampton-dom/diff', 'frampton-dom/ops/apply_patch', 'frampton-dom/ops/apply_globals'], function (exports, _diff, _apply_patch, _apply_globals) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -1493,6 +1596,8 @@ define('frampton-dom/update', ['exports', 'frampton-dom/diff', 'frampton-dom/ops
   var _diff2 = _interopRequireDefault(_diff);
 
   var _apply_patch2 = _interopRequireDefault(_apply_patch);
+
+  var _apply_globals2 = _interopRequireDefault(_apply_globals);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -1508,9 +1613,10 @@ define('frampton-dom/update', ['exports', 'frampton-dom/diff', 'frampton-dom/ops
   function run_update(rootNode, oldTree, newTree) {
     var patch = (0, _diff2.default)(oldTree, newTree);
     (0, _apply_patch2.default)(patch, rootNode, rootNode);
+    (0, _apply_globals2.default)(rootNode);
   }
 });
-define('frampton-dom/utils/diff_class', ['exports', 'frampton-list/length', 'frampton-dom/utils/validated_class'], function (exports, _length, _validated_class) {
+define('frampton-dom/utils/diff_class', ['exports', 'frampton-list/length', 'frampton-dom/utils/empty_class', 'frampton-dom/utils/validated_class'], function (exports, _length, _empty_class, _validated_class) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -1519,6 +1625,8 @@ define('frampton-dom/utils/diff_class', ['exports', 'frampton-list/length', 'fra
   exports.default = diff_class;
 
   var _length2 = _interopRequireDefault(_length);
+
+  var _empty_class2 = _interopRequireDefault(_empty_class);
 
   var _validated_class2 = _interopRequireDefault(_validated_class);
 
@@ -1537,7 +1645,7 @@ define('frampton-dom/utils/diff_class', ['exports', 'frampton-list/length', 'fra
 
     for (var i = 0; i < oLen; i++) {
       if (newClass.add.indexOf(oldClass.add[i]) === -1) {
-        diff = diff || { add: [], remove: [] };
+        diff = diff || (0, _empty_class2.default)();
         diff.remove = diff.remove || [];
         diff.remove.push(oldClass.add[i]);
       }
@@ -1545,7 +1653,7 @@ define('frampton-dom/utils/diff_class', ['exports', 'frampton-list/length', 'fra
 
     for (var _i = 0; _i < nLen; _i++) {
       if (oldClass.add.indexOf(newClass.add[_i]) === -1) {
-        diff = diff || { add: [], remove: [] };
+        diff = diff || (0, _empty_class2.default)();
         diff.add = diff.add || [];
         diff.add.push(newClass.add[_i]);
       }
@@ -1624,16 +1732,8 @@ define('frampton-dom/utils/diff_props', ['exports', 'frampton-utils/is_object', 
     for (var _key in newProps) {
       if ((0, _is_undefined2.default)(oldProps[_key])) {
         var _newValue = newProps[_key];
-        if (_key === 'class') {
-          var _tempDiff3 = (0, _diff_class2.default)('', _newValue);
-          if (_tempDiff3) {
-            diff = diff || {};
-            diff[_key] = _tempDiff3;
-          }
-        } else {
-          diff = diff || {};
-          diff[_key] = _newValue;
-        }
+        diff = diff || {};
+        diff[_key] = _newValue;
       }
     }
 
@@ -1801,6 +1901,21 @@ define('frampton-dom/utils/is_text', ['exports', 'frampton-utils/is_object'], fu
 
   function is_text(node) {
     return (0, _is_object2.default)(node) && node.ctor === 'VirtualText';
+  }
+});
+define("frampton-dom/utils/node_at_index", ["exports"], function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = node_at_index;
+  function node_at_index(node, index) {
+    if (node && node.childNodes) {
+      return node.childNodes[index] || null;
+    } else {
+      return null;
+    }
   }
 });
 define('frampton-dom/utils/normalized_frame', ['exports', 'frampton-utils/is_number', 'frampton-list/contains', 'frampton-dom/utils/easing'], function (exports, _is_number, _contains, _easing) {
@@ -2023,30 +2138,36 @@ define('frampton-dom/utils/validated_class', ['exports', 'frampton-utils/is_arra
     };
   }
 
+  function splitClass(str) {
+    return str.split(' ').filter(_not_empty2.default);
+  }
+
+  /**
+   * @name validatedClass
+   */
   function validated_class(str) {
+
+    var newClass = (0, _empty_class2.default)();
 
     if ((0, _is_string2.default)(str)) {
 
-      return {
-        add: str.split(' ').filter(_not_empty2.default),
-        remove: []
-      };
+      newClass.add = splitClass(str);
     } else if ((0, _is_object2.default)(str)) {
-
-      var newClass = (0, _empty_class2.default)();
 
       if ((0, _is_array2.default)(str.add)) {
         newClass.add = str.add;
+      } else if ((0, _is_string2.default)(str.add)) {
+        newClass.add = splitClass(str.add);
       }
 
       if ((0, _is_array2.default)(str.remove)) {
         newClass.remove = str.remove;
+      } else if ((0, _is_string2.default)(str.remove)) {
+        newClass.remove = splitClass(str.remove);
       }
-
-      return newClass;
-    } else {
-      return (0, _empty_class2.default)();
     }
+
+    return newClass;
   }
 });
 define('frampton-dom/utils/validated_transition', ['exports', 'frampton-dom/utils/normalized_frame', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/empty_transition'], function (exports, _normalized_frame, _validated_class, _empty_transition) {

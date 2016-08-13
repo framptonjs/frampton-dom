@@ -12,7 +12,7 @@
     "docs": "rm -rfv docs/* && jsdoc packages/**/src/*.js -d docs --readme README.md  --private"
   },
   "author": "Kevin Greene <hightimesteddy@gmail.com>",
-  "license": "MIT",
+  "license": "BSD",
   "repository": {
     "type": "git",
     "url": "git@github.com:framptonjs/frampton-dom.git"

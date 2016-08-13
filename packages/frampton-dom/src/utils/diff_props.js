@@ -24,24 +24,27 @@ export default function diff_props(oldProps, newProps) {
     if (key === 'transition') {
       oldValue = validatedTransition(oldValue);
       newValue = validatedTransition(newValue);
-      let tempDiff = diff_props(oldValue, newValue);
+      const tempDiff = diff_props(oldValue, newValue);
       if (tempDiff) {
         diff = (diff || {});
         diff[key] = tempDiff;
       }
+
     } else if (key === 'class') {
       newValue = (newValue || '');
-      let tempDiff = diffClass(oldValue, newValue);
+      const tempDiff = diffClass(oldValue, newValue);
       if (tempDiff) {
         diff = (diff || {});
         diff[key] = tempDiff;
       }
+
     } else if (isObject(oldValue) && isObject(newValue)) {
-      let tempDiff = diff_props(oldValue, newValue);
+      const tempDiff = diff_props(oldValue, newValue);
       if (tempDiff) {
         diff = (diff || {});
         diff[key] = tempDiff;
       }
+
     } else if (oldValue !== newValue) {
       diff = (diff || {});
       diff[key] = newValue;
@@ -51,16 +54,8 @@ export default function diff_props(oldProps, newProps) {
   for (let key in newProps) {
     if (isUndefined(oldProps[key])) {
       const newValue = newProps[key];
-      if (key === 'class') {
-        let tempDiff = diffClass('', newValue);
-        if (tempDiff) {
-          diff = (diff || {});
-          diff[key] = tempDiff;
-        }
-      } else {
-        diff = (diff || {});
-        diff[key] = newValue;
-      }
+      diff = (diff || {});
+      diff[key] = newValue;
     }
   }
 
