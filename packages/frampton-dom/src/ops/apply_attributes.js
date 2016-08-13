@@ -11,7 +11,7 @@ import isEvent from 'frampton-dom/events/utils/is_event';
 import { addEvent, removeEvent } from 'frampton-dom/events/event_dispatcher';
 
 // Properties to not add to DOM node
-const properties = [
+const blacklist = [
   'key',
   'transitionIn',
   'transitionOut'
@@ -29,12 +29,18 @@ export default function apply_attributes(node, attrs) {
       if (isEvent(name)) {
         removeEvent(name, node);
       } else {
+
         if (name === 'focus') {
           node.removeAttribute('data-fr-dom-focus');
+
+        } else if (name === 'html') {
+          node.innerHTML = '';
+
         } else {
           node.removeAttribute(name);
         }
       }
+
     } else {
 
       if (name === 'style') {
@@ -53,10 +59,13 @@ export default function apply_attributes(node, attrs) {
       } else if (name === 'focus') {
         node.setAttribute('data-fr-dom-focus', value);
 
+      } else if (name === 'html') {
+        node.innerHTML = value;
+
       } else if (isEvent(name)) {
         addEvent(name, node, value);
 
-      } else if (!contains(properties, name)) {
+      } else if (!contains(blacklist, name)) {
         node.setAttribute(name, value);
       }
     }

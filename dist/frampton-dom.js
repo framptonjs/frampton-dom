@@ -876,7 +876,7 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
   }
 
   // Properties to not add to DOM node
-  var properties = ['key', 'transitionIn', 'transitionOut'];
+  var blacklist = ['key', 'transitionIn', 'transitionOut'];
 
   /**
    * @name applyAttributes
@@ -890,8 +890,11 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
         if ((0, _is_event2.default)(name)) {
           (0, _event_dispatcher.removeEvent)(name, node);
         } else {
+
           if (name === 'focus') {
             node.removeAttribute('data-fr-dom-focus');
+          } else if (name === 'html') {
+            node.innerHTML = '';
           } else {
             node.removeAttribute(name);
           }
@@ -910,9 +913,11 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
           (0, _apply_classes2.default)(node, (0, _validated_class2.default)(value));
         } else if (name === 'focus') {
           node.setAttribute('data-fr-dom-focus', value);
+        } else if (name === 'html') {
+          node.innerHTML = value;
         } else if ((0, _is_event2.default)(name)) {
           (0, _event_dispatcher.addEvent)(name, node, value);
-        } else if (!(0, _contains2.default)(properties, name)) {
+        } else if (!(0, _contains2.default)(blacklist, name)) {
           node.setAttribute(name, value);
         }
       }
@@ -969,10 +974,13 @@ define('frampton-dom/ops/apply_globals', ['exports', 'frampton-utils/is_somethin
     };
   }
 
+  /**
+   * We would like to apply some attributes after the DOM is constructed,
+   * such as focus.
+   */
   function apply_globals(root) {
     var focused = root.querySelector('[data-fr-dom-focus="true"]');
     if ((0, _is_something2.default)(focused) && focused.nodeType === 1) {
-      console.log('focused: ', focused);
       focused.focus();
     }
   }
