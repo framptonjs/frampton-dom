@@ -197,9 +197,9 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
 
     var oldChildren = oldNode.children;
     var newChildren = newNode.children;
-    var nLength = newChildren.length;
-    var oLength = oldChildren.length;
-    var len = (0, _max2.default)(oLength, nLength);
+    var newLength = newChildren.length;
+    var oldLength = oldChildren.length;
+    var len = (0, _max2.default)(oldLength, newLength);
     var orderMap = [];
     var inserts = [];
     var newKeys = {};
@@ -207,8 +207,8 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
     var dirty = false;
     var parentPatch = void 0;
 
-    // Create a map of keys to their new index
-    for (var i = 0; i < nLength; i++) {
+    // Create a map of keys to their new index O(n)
+    for (var i = 0; i < newLength; i++) {
       var child = newChildren[i];
       if ((0, _is_node2.default)(child)) {
         var key = child.key;
@@ -218,8 +218,8 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
       }
     }
 
-    // Create a map of keys to their old index
-    for (var _i = 0; _i < oLength; _i++) {
+    // Create a map of keys to their old index O(n)
+    for (var _i = 0; _i < oldLength; _i++) {
       var _child = oldChildren[_i];
       if ((0, _is_node2.default)(_child)) {
         var _key = _child.key;
@@ -229,6 +229,7 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
       }
     }
 
+    // O(n)
     for (var _i2 = 0; _i2 < len; _i2++) {
       var oldChild = oldChildren[_i2];
       var newChild = newChildren[_i2];
@@ -298,7 +299,7 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
         // Old node was text
         if ((0, _is_text2.default)(oldChild)) {
 
-          // Both node are text, index is the same
+          // Both nodes are text, index is the same
           orderMap[_i2] = _i2;
 
           // Text nodes are the same if they have same text, duh.

@@ -67,9 +67,9 @@ function diffChildren(oldNode, newNode) {
 
   const oldChildren = oldNode.children;
   const newChildren = newNode.children;
-  const nLength = newChildren.length;
-  const oLength = oldChildren.length;
-  const len = max(oLength, nLength);
+  const newLength = newChildren.length;
+  const oldLength = oldChildren.length;
+  const len = max(oldLength, newLength);
   const orderMap = [];
   const inserts = [];
   const newKeys = {};
@@ -77,8 +77,8 @@ function diffChildren(oldNode, newNode) {
   let dirty = false;
   let parentPatch;
 
-  // Create a map of keys to their new index
-  for (let i = 0; i < nLength; i++) {
+  // Create a map of keys to their new index O(n)
+  for (let i = 0; i < newLength; i++) {
     let child = newChildren[i];
     if (isNode(child)) {
       const key = child.key;
@@ -88,8 +88,8 @@ function diffChildren(oldNode, newNode) {
     }
   }
 
-  // Create a map of keys to their old index
-  for (let i = 0; i < oLength; i++) {
+  // Create a map of keys to their old index O(n)
+  for (let i = 0; i < oldLength; i++) {
     let child = oldChildren[i];
     if (isNode(child)) {
       const key = child.key;
@@ -99,6 +99,7 @@ function diffChildren(oldNode, newNode) {
     }
   }
 
+  // O(n)
   for (let i = 0; i < len; i++) {
     const oldChild = oldChildren[i];
     const newChild = newChildren[i];
@@ -168,7 +169,7 @@ function diffChildren(oldNode, newNode) {
       // Old node was text
       if (isText(oldChild)) {
 
-        // Both node are text, index is the same
+        // Both nodes are text, index is the same
         orderMap[i] = i;
 
         // Text nodes are the same if they have same text, duh.
