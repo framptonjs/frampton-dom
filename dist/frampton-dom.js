@@ -93,6 +93,7 @@ define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom
   _namespace2.default.DOM.Html.legend = _dom.legend;
   _namespace2.default.DOM.Html.fieldset = _dom.fieldset;
   _namespace2.default.DOM.Html.input = _dom.input;
+  _namespace2.default.DOM.Html.label = _dom.label;
   _namespace2.default.DOM.Html.button = _dom.button;
   _namespace2.default.DOM.Html.textarea = _dom.textarea;
   _namespace2.default.DOM.Html.option = _dom.option;
