@@ -1435,7 +1435,7 @@ define('frampton-dom/ops/reorder_nodes', ['exports', 'frampton-utils/is_number',
     }
   }
 });
-define('frampton-dom/ops/replace_node', ['exports', 'frampton-dom/ops/create_element', 'frampton-dom/events/event_dispatcher'], function (exports, _create_element, _event_dispatcher) {
+define('frampton-dom/ops/replace_node', ['exports', 'frampton-dom/ops/create_element'], function (exports, _create_element) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -1464,7 +1464,6 @@ define('frampton-dom/ops/replace_node', ['exports', 'frampton-dom/ops/create_ele
       var parent = oldNode.parentNode;
       var newNode = (0, _create_element2.default)(vnode);
       if (parent) {
-        (0, _event_dispatcher.removeEvents)(oldNode);
         parent.replaceChild(newNode, oldNode);
       }
     }
