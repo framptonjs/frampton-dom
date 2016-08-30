@@ -15,7 +15,7 @@ import {
   h1, h2, h3, h4, h5, h6,
   strong, em, a, pre, code,
   legend, fieldset, input, button, label,
-  select, option, optgroup, textarea,
+  form, select, option, optgroup, textarea,
   video, audio, source,
   img, figure, figcaption,
   table, thead, tbody, tfoot, tr, td,
@@ -82,6 +82,7 @@ Frampton.DOM.Html.em         = em;
 Frampton.DOM.Html.pre        = pre;
 Frampton.DOM.Html.code       = code;
 // FORMS
+Frampton.DOM.Html.form       = form;
 Frampton.DOM.Html.legend     = legend;
 Frampton.DOM.Html.fieldset   = fieldset;
 Frampton.DOM.Html.input      = input;

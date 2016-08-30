@@ -1,3 +1,5 @@
+import isArray from 'frampton-utils/is_array';
+import warn from 'frampton-utils/warn';
 import vnode from 'frampton-dom/virtual/node';
 import vtext from 'frampton-dom/virtual/text';
 
@@ -150,7 +152,10 @@ export const dd = (attrs, children) => {
 // MEDIA
 
 export const img = (attrs, children) => {
-  return vnode('img', attrs, children);
+  if (isArray(children) && children.length > 0) {
+    warn('Html img tag does not support children');
+  }
+  return vnode('img', attrs, []);
 };
 
 export const video = (attrs, children) => {
@@ -175,6 +180,10 @@ export const figcaption = (attrs, children) => {
 
 
 // FORMS
+
+export const form = (attrs, children) => {
+  return vnode('form', attrs, children);
+};
 
 export const legend = (attrs, children) => {
   return vnode('legend', attrs, children);

@@ -90,6 +90,7 @@ define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom
   _namespace2.default.DOM.Html.pre = _dom.pre;
   _namespace2.default.DOM.Html.code = _dom.code;
   // FORMS
+  _namespace2.default.DOM.Html.form = _dom.form;
   _namespace2.default.DOM.Html.legend = _dom.legend;
   _namespace2.default.DOM.Html.fieldset = _dom.fieldset;
   _namespace2.default.DOM.Html.input = _dom.input;
@@ -563,13 +564,17 @@ define("frampton-dom/events/utils/node_gate", ["exports"], function (exports) {
     };
   }
 });
-define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampton-dom/virtual/text'], function (exports, _node, _text) {
+define('frampton-dom/html/dom', ['exports', 'frampton-utils/is_array', 'frampton-utils/warn', 'frampton-dom/virtual/node', 'frampton-dom/virtual/text'], function (exports, _is_array, _warn, _node, _text) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.td = exports.tr = exports.th = exports.colgroup = exports.col = exports.tfoot = exports.thead = exports.tbody = exports.caption = exports.table = exports.em = exports.strong = exports.code = exports.pre = exports.textarea = exports.input = exports.select = exports.button = exports.label = exports.optgroup = exports.option = exports.fieldset = exports.legend = exports.figcaption = exports.figure = exports.source = exports.audio = exports.video = exports.img = exports.dd = exports.dt = exports.dl = exports.li = exports.ol = exports.ul = exports.h6 = exports.h5 = exports.h4 = exports.h3 = exports.h2 = exports.h1 = exports.progress = exports.details = exports.summary = exports.address = exports.menuitem = exports.menu = exports.nav = exports.main = exports.aside = exports.section = exports.article = exports.footer = exports.header = exports.a = exports.p = exports.span = exports.div = exports.text = exports.node = undefined;
+  exports.td = exports.tr = exports.th = exports.colgroup = exports.col = exports.tfoot = exports.thead = exports.tbody = exports.caption = exports.table = exports.em = exports.strong = exports.code = exports.pre = exports.textarea = exports.input = exports.select = exports.button = exports.label = exports.optgroup = exports.option = exports.fieldset = exports.legend = exports.form = exports.figcaption = exports.figure = exports.source = exports.audio = exports.video = exports.img = exports.dd = exports.dt = exports.dl = exports.li = exports.ol = exports.ul = exports.h6 = exports.h5 = exports.h4 = exports.h3 = exports.h2 = exports.h1 = exports.progress = exports.details = exports.summary = exports.address = exports.menuitem = exports.menu = exports.nav = exports.main = exports.aside = exports.section = exports.article = exports.footer = exports.header = exports.a = exports.p = exports.span = exports.div = exports.text = exports.node = undefined;
+
+  var _is_array2 = _interopRequireDefault(_is_array);
+
+  var _warn2 = _interopRequireDefault(_warn);
 
   var _node2 = _interopRequireDefault(_node);
 
@@ -722,7 +727,10 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   // MEDIA
 
   var img = exports.img = function img(attrs, children) {
-    return (0, _node2.default)('img', attrs, children);
+    if ((0, _is_array2.default)(children) && children.length > 0) {
+      (0, _warn2.default)('Html img tag does not support children');
+    }
+    return (0, _node2.default)('img', attrs, []);
   };
 
   var video = exports.video = function video(attrs, children) {
@@ -746,6 +754,10 @@ define('frampton-dom/html/dom', ['exports', 'frampton-dom/virtual/node', 'frampt
   };
 
   // FORMS
+
+  var form = exports.form = function form(attrs, children) {
+    return (0, _node2.default)('form', attrs, children);
+  };
 
   var legend = exports.legend = function legend(attrs, children) {
     return (0, _node2.default)('legend', attrs, children);
