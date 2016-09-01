@@ -37,7 +37,7 @@ define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom
    * @memberof Frampton
    */
   _namespace2.default.DOM = {};
-  _namespace2.default.DOM.VERSION = '0.1.0';
+  _namespace2.default.DOM.VERSION = '0.1.1';
   _namespace2.default.DOM.diff = _diff2.default;
   _namespace2.default.DOM.update = _update2.default;
   _namespace2.default.DOM.scene = _scene2.default;
