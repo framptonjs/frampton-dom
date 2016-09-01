@@ -25,7 +25,7 @@ const blacklist = [
 export default function apply_attributes(node, attrs) {
   for (const name in attrs) {
     const value = attrs[name];
-    if (isNothing(value)) {
+    if (isNothing(value) || value === false) {
       if (isEvent(name)) {
         removeEvent(name, node);
       } else {

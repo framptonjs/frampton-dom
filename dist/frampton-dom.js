@@ -7,12 +7,13 @@ var global = this;
 
   if (typeof Frampton === 'undefined') {
     throw new Error('Frampton is undefined');
-  };
+  }
 
   define = Frampton.__loader.define;
   require = Frampton.__loader.require;
 
 }());
+
 define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom/update', 'frampton-dom/scene', 'frampton-dom/html/dom'], function (_namespace, _diff, _update, _scene, _dom) {
   'use strict';
 
@@ -900,7 +901,7 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
   function apply_attributes(node, attrs) {
     for (var name in attrs) {
       var value = attrs[name];
-      if ((0, _is_nothing2.default)(value)) {
+      if ((0, _is_nothing2.default)(value) || value === false) {
         if ((0, _is_event2.default)(name)) {
           (0, _event_dispatcher.removeEvent)(name, node);
         } else {
