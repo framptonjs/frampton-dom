@@ -16,7 +16,7 @@ const pixels = contains(
 );
 
 export default function normalized_frame(frame) {
-  var obj = {};
+  const obj = {};
   for (let key in frame) {
     if (alias_mapping[key]) {
       if (isNumber(frame[key])) {

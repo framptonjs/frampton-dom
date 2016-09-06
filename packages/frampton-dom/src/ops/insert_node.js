@@ -10,8 +10,8 @@ import transitionIn from 'frampton-dom/utils/transition_in';
  * @param {Element} current
  * @param {VirtualNode} vnode
  */
-export default function insert_node(parent, current, vnode) {
-  const child = createElement(vnode);
+export default function insert_node(parent, current, vnode, messages) {
+  const child = createElement(vnode, messages);
   if (vnode.attributes.transitionIn) {
     transitionIn(child, vnode.attributes.transitionIn);
   }

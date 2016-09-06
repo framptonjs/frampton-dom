@@ -1,6 +1,7 @@
 import immediate from 'frampton-utils/immediate';
 import EVENT_MAP from 'frampton-dom/events/event_map';
 import nodeGate from 'frampton-dom/events/utils/node_gate';
+import makeHandler from 'frampton-dom/events/utils/make_handler';
 
 /**
  * @name addEvent
@@ -11,9 +12,11 @@ import nodeGate from 'frampton-dom/events/utils/node_gate';
  * @param {Element} node
  * @param {Function} handler
  */
-export function addEvent(name, node, handler) {
+export default function add_event(name, node, messages, decorator) {
   name = (EVENT_MAP[name] || name);
   immediate(() => {
+
+    var handler = makeHandler(messages, decorator);
 
     // Transitionend events will not be fired for child nodes. The event must occur on this node.
     if (name === 'transitionend') {
@@ -21,20 +24,5 @@ export function addEvent(name, node, handler) {
     }
 
     node['on' + name] = handler;
-  });
-}
-
-/**
- * @name removeEvent
- * @method
- * @memberof Frampton.DOM.events
- * @private
- * @param {String} name
- * @param {Element} node
- */
-export function removeEvent(name, node) {
-  name = (EVENT_MAP[name] || name);
-  immediate(() => {
-    node['on' + name] = null;
   });
 }

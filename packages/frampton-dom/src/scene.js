@@ -16,16 +16,22 @@ const STATES = {
  * @memberof Frampton.DOM
  * @method
  * @param {Element} rootNode The node to attach our scene to
+ * @param {Function} messages A function to handle events in the DOM
  * @returns {Function} A function to schedule updates
  */
-export default function scene(rootNode) {
+export default function scene(rootNode, messages) {
 
   var savedDOM = null;
   var scheduledDOM = null;
   var state = STATES.NOTHING;
 
   function draw() {
-    update(rootNode, savedDOM, scheduledDOM);
+    update({
+      rootNode : rootNode,
+      messages : messages,
+      oldTree : savedDOM,
+      newTree : scheduledDOM
+    });
     savedDOM = scheduledDOM;
     state = STATES.NOTHING;
   }

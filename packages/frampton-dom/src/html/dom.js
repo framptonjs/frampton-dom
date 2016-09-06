@@ -214,6 +214,9 @@ export const select = (attrs, children) => {
 };
 
 export const input = (attrs, children) => {
+  if (isArray(children) && children.length > 0) {
+    warn('Html input tag does not support children');
+  }
   return vnode('input', attrs, children);
 };
 

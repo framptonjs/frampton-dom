@@ -9,7 +9,7 @@ import executePatch from 'frampton-dom/ops/execute_patch';
  * @param {Element} current
  * @param {Object} patches
  */
-export default function perform_inserts(current, patches) {
+export default function perform_inserts(current, patches, messages) {
 
   const arr = [];
   const len = (current) ? current.childNodes.length : 0;
@@ -27,7 +27,7 @@ export default function perform_inserts(current, patches) {
   for (let key in patches) {
     if (isNumeric(key)) {
       const update = patches[key];
-      executePatch(update, current, arr[(key - cursor)]);
+      executePatch(update, messages, current, arr[(key - cursor)]);
       if (update.type === PATCHES.INSERT) {
         cursor += 1;
       }

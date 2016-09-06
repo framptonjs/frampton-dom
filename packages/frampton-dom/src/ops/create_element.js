@@ -13,7 +13,7 @@ const doc = window.document;
  * @param {VirtualNode}
  * @returns {Element} A new HTML Element
  */
-export default function create_element(vnode) {
+export default function create_element(vnode, messages) {
 
   if (isText(vnode)) {
     return doc.createTextNode(vnode.text);
@@ -22,10 +22,10 @@ export default function create_element(vnode) {
   const children = vnode.children;
   const len = children.length;
   const node = doc.createElement(vnode.tagName);
-  applyAttributes(node, vnode.attributes);
+  applyAttributes(node, vnode.attributes, messages);
 
   for (let i = 0; i < len; i++) {
-    const childNode = create_element(children[i]);
+    const childNode = create_element(children[i], messages);
     if (childNode) {
       node.appendChild(childNode);
     }

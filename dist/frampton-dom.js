@@ -413,20 +413,21 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
     return [patch];
   }
 });
-define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-utils/immediate', 'frampton-dom/events/event_map', 'frampton-dom/events/utils/node_gate'], function (exports, _immediate, _event_map, _node_gate) {
+define('frampton-dom/events/add_event', ['exports', 'frampton-utils/immediate', 'frampton-dom/events/event_map', 'frampton-dom/events/utils/node_gate', 'frampton-dom/events/utils/make_handler'], function (exports, _immediate, _event_map, _node_gate, _make_handler) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.addEvent = addEvent;
-  exports.removeEvent = removeEvent;
+  exports.default = add_event;
 
   var _immediate2 = _interopRequireDefault(_immediate);
 
   var _event_map2 = _interopRequireDefault(_event_map);
 
   var _node_gate2 = _interopRequireDefault(_node_gate);
+
+  var _make_handler2 = _interopRequireDefault(_make_handler);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -443,9 +444,11 @@ define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-utils/immed
    * @param {Element} node
    * @param {Function} handler
    */
-  function addEvent(name, node, handler) {
+  function add_event(name, node, messages, decorator) {
     name = _event_map2.default[name] || name;
     (0, _immediate2.default)(function () {
+
+      var handler = (0, _make_handler2.default)(messages, decorator);
 
       // Transitionend events will not be fired for child nodes. The event must occur on this node.
       if (name === 'transitionend') {
@@ -453,21 +456,6 @@ define('frampton-dom/events/event_dispatcher', ['exports', 'frampton-utils/immed
       }
 
       node['on' + name] = handler;
-    });
-  }
-
-  /**
-   * @name removeEvent
-   * @method
-   * @memberof Frampton.DOM.events
-   * @private
-   * @param {String} name
-   * @param {Element} node
-   */
-  function removeEvent(name, node) {
-    name = _event_map2.default[name] || name;
-    (0, _immediate2.default)(function () {
-      node['on' + name] = null;
     });
   }
 });
@@ -525,6 +513,39 @@ define('frampton-dom/events/event_map', ['exports'], function (exports) {
     onTransitionEnd: 'transitionend'
   };
 });
+define('frampton-dom/events/remove_event', ['exports', 'frampton-utils/immediate', 'frampton-dom/events/event_map'], function (exports, _immediate, _event_map) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = remove_event;
+
+  var _immediate2 = _interopRequireDefault(_immediate);
+
+  var _event_map2 = _interopRequireDefault(_event_map);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  /**
+   * @name removeEvent
+   * @method
+   * @memberof Frampton.DOM.events
+   * @private
+   * @param {String} name
+   * @param {Element} node
+   */
+  function remove_event(name, node) {
+    name = _event_map2.default[name] || name;
+    (0, _immediate2.default)(function () {
+      node['on' + name] = null;
+    });
+  }
+});
 define('frampton-dom/events/utils/is_event', ['exports', 'frampton-utils/is_something', 'frampton-dom/events/event_map'], function (exports, _is_something, _event_map) {
   'use strict';
 
@@ -547,6 +568,19 @@ define('frampton-dom/events/utils/is_event', ['exports', 'frampton-utils/is_some
     return (0, _is_something2.default)(_event_map2.default[name]);
   }
 });
+define("frampton-dom/events/utils/make_handler", ["exports"], function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = make_handler;
+  function make_handler(messages, decorator) {
+    return function (evt) {
+      messages(decorator(evt));
+    };
+  }
+});
 define("frampton-dom/events/utils/node_gate", ["exports"], function (exports) {
   "use strict";
 
@@ -560,7 +594,7 @@ define("frampton-dom/events/utils/node_gate", ["exports"], function (exports) {
   function node_gate(node, fn) {
     return function (evt) {
       if (evt.target === node) {
-        fn(evt);
+        return fn(evt);
       }
     };
   }
@@ -789,6 +823,9 @@ define('frampton-dom/html/dom', ['exports', 'frampton-utils/is_array', 'frampton
   };
 
   var input = exports.input = function input(attrs, children) {
+    if ((0, _is_array2.default)(children) && children.length > 0) {
+      (0, _warn2.default)('Html input tag does not support children');
+    }
     return (0, _node2.default)('input', attrs, children);
   };
 
@@ -856,7 +893,7 @@ define('frampton-dom/html/dom', ['exports', 'frampton-utils/is_array', 'frampton
     return (0, _node2.default)('td', attrs, children);
   };
 });
-define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-list/contains', 'frampton-style/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/event_dispatcher'], function (exports, _is_nothing, _is_object, _warn, _contains, _apply_styles, _apply_classes, _validated_class, _validated_transition, _apply_transition, _is_event, _event_dispatcher) {
+define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-list/contains', 'frampton-style/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/add_event', 'frampton-dom/events/remove_event'], function (exports, _is_nothing, _is_object, _warn, _contains, _apply_styles, _apply_classes, _validated_class, _validated_transition, _apply_transition, _is_event, _add_event, _remove_event) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -884,6 +921,10 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
 
   var _is_event2 = _interopRequireDefault(_is_event);
 
+  var _add_event2 = _interopRequireDefault(_add_event);
+
+  var _remove_event2 = _interopRequireDefault(_remove_event);
+
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
       default: obj
@@ -897,13 +938,15 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
    * @name applyAttributes
    * @param {Element} node Dom element to apply attributes to
    * @param {Object} attrs Hash of attributes to apply
+   * @param {Functon} messages Function to handle events
    */
-  function apply_attributes(node, attrs) {
+  function apply_attributes(node, attrs, messages) {
+
     for (var name in attrs) {
       var value = attrs[name];
       if ((0, _is_nothing2.default)(value) || value === false) {
         if ((0, _is_event2.default)(name)) {
-          (0, _event_dispatcher.removeEvent)(name, node);
+          (0, _remove_event2.default)(name, node);
         } else {
 
           if (name === 'focus') {
@@ -931,7 +974,7 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
         } else if (name === 'html') {
           node.innerHTML = value;
         } else if ((0, _is_event2.default)(name)) {
-          (0, _event_dispatcher.addEvent)(name, node, value);
+          (0, _add_event2.default)(name, node, messages, value);
         } else if (!(0, _contains2.default)(blacklist, name)) {
           node.setAttribute(name, value);
         }
@@ -1030,7 +1073,7 @@ define('frampton-dom/ops/apply_patch', ['exports', 'frampton-utils/is_numeric', 
    * @param {Element} parent
    * @param {Element} current
    */
-  function apply_patch(patch, parent, current) {
+  function apply_patch(patch, messages, parent, current) {
 
     (0, _reset_child_state2.default)(current);
 
@@ -1038,23 +1081,48 @@ define('frampton-dom/ops/apply_patch', ['exports', 'frampton-utils/is_numeric', 
     for (var key in patch) {
       if ((0, _is_numeric2.default)(key)) {
         var child = (0, _node_at_index2.default)(current, key);
-        apply_patch(patch[key], current, child);
+        apply_patch(patch[key], messages, current, child);
       }
     }
 
     // Reorder child nodes
     if (patch._o) {
-      (0, _execute_patch2.default)(patch._o, parent, current);
+      (0, _execute_patch2.default)(patch._o, messages, parent, current);
     }
 
     // Insert new nodes
     if (patch._i) {
-      (0, _perform_inserts2.default)(current, patch._i);
+      (0, _perform_inserts2.default)(current, patch._i, messages);
     }
 
     // Patch props and text
     if (patch._p) {
-      (0, _execute_patch2.default)(patch._p, parent, current);
+      (0, _execute_patch2.default)(patch._p, messages, parent, current);
+    }
+  }
+});
+define('frampton-dom/ops/apply_styles', ['exports', 'frampton-style/set_style'], function (exports, _set_style) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = apply_styles;
+
+  var _set_style2 = _interopRequireDefault(_set_style);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function apply_styles(node, props) {
+    for (var key in props) {
+      var value = props[key];
+      if (key === 'height' && value === 'auto') {} else if (key === 'width' && value === 'auto') {} else {
+        (0, _set_style2.default)(node, key, value);
+      }
     }
   }
 });
@@ -1098,7 +1166,7 @@ define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/apply_st
 
     (0, _immediate2.default)(function () {
       var endClasses = (0, _validated_class2.default)(desc.to.class);
-      var endFrame = (0, _normalized_frame2.default)(desc.to.style || {});
+      var endFrame = (0, _normalized_frame2.default)(desc.to.style);
       // Force a reflow to make sure we're in a good state
       (0, _reflow2.default)(node);
       (0, _apply_classes2.default)(node, endClasses);
@@ -1136,7 +1204,7 @@ define('frampton-dom/ops/create_element', ['exports', 'frampton-dom/utils/is_tex
    * @param {VirtualNode}
    * @returns {Element} A new HTML Element
    */
-  function create_element(vnode) {
+  function create_element(vnode, messages) {
 
     if ((0, _is_text2.default)(vnode)) {
       return doc.createTextNode(vnode.text);
@@ -1145,10 +1213,10 @@ define('frampton-dom/ops/create_element', ['exports', 'frampton-dom/utils/is_tex
     var children = vnode.children;
     var len = children.length;
     var node = doc.createElement(vnode.tagName);
-    (0, _apply_attributes2.default)(node, vnode.attributes);
+    (0, _apply_attributes2.default)(node, vnode.attributes, messages);
 
     for (var i = 0; i < len; i++) {
-      var childNode = create_element(children[i]);
+      var childNode = create_element(children[i], messages);
       if (childNode) {
         node.appendChild(childNode);
       }
@@ -1185,7 +1253,7 @@ define('frampton-dom/ops/execute_patch', ['exports', 'frampton-dom/virtual/patch
     };
   }
 
-  function execute_patch(patch, parentNode, currentNode) {
+  function execute_patch(patch, messages, parentNode, currentNode) {
 
     var type = patch.type;
     var update = patch.update;
@@ -1196,19 +1264,19 @@ define('frampton-dom/ops/execute_patch', ['exports', 'frampton-dom/virtual/patch
         break;
 
       case _patch_types2.default.APPEND:
-        return (0, _insert_node2.default)(parentNode, null, update);
+        return (0, _insert_node2.default)(parentNode, null, update, messages);
 
       case _patch_types2.default.INSERT:
-        return (0, _insert_node2.default)(parentNode, currentNode, update);
+        return (0, _insert_node2.default)(parentNode, currentNode, update, messages);
 
       case _patch_types2.default.REMOVE:
         return (0, _remove_node2.default)(currentNode);
 
       case _patch_types2.default.REPLACE:
-        return (0, _replace_node2.default)(currentNode, update);
+        return (0, _replace_node2.default)(currentNode, update, messages);
 
       case _patch_types2.default.PROPS:
-        return (0, _apply_attributes2.default)(currentNode, update);
+        return (0, _apply_attributes2.default)(currentNode, update, messages);
 
       case _patch_types2.default.TEXT:
         return (0, _update_text2.default)(currentNode, update);
@@ -1248,8 +1316,8 @@ define('frampton-dom/ops/insert_node', ['exports', 'frampton-dom/ops/create_elem
    * @param {Element} current
    * @param {VirtualNode} vnode
    */
-  function insert_node(parent, current, vnode) {
-    var child = (0, _create_element2.default)(vnode);
+  function insert_node(parent, current, vnode, messages) {
+    var child = (0, _create_element2.default)(vnode, messages);
     if (vnode.attributes.transitionIn) {
       (0, _transition_in2.default)(child, vnode.attributes.transitionIn);
     }
@@ -1289,7 +1357,7 @@ define('frampton-dom/ops/perform_inserts', ['exports', 'frampton-utils/is_numeri
    * @param {Element} current
    * @param {Object} patches
    */
-  function perform_inserts(current, patches) {
+  function perform_inserts(current, patches, messages) {
 
     var arr = [];
     var len = current ? current.childNodes.length : 0;
@@ -1307,7 +1375,7 @@ define('frampton-dom/ops/perform_inserts', ['exports', 'frampton-utils/is_numeri
     for (var key in patches) {
       if ((0, _is_numeric2.default)(key)) {
         var update = patches[key];
-        (0, _execute_patch2.default)(update, current, arr[key - cursor]);
+        (0, _execute_patch2.default)(update, messages, current, arr[key - cursor]);
         if (update.type === _patch_types2.default.INSERT) {
           cursor += 1;
         }
@@ -1473,10 +1541,10 @@ define('frampton-dom/ops/replace_node', ['exports', 'frampton-dom/ops/create_ele
    * @param {Element} oldNode Node to replace
    * @param {VirtualNode} vnode VirtualNode representing replacement
    */
-  function replace_node(oldNode, vnode) {
+  function replace_node(oldNode, vnode, messages) {
     if (oldNode) {
       var parent = oldNode.parentNode;
-      var newNode = (0, _create_element2.default)(vnode);
+      var newNode = (0, _create_element2.default)(vnode, messages);
       if (parent) {
         parent.replaceChild(newNode, oldNode);
       }
@@ -1576,16 +1644,22 @@ define('frampton-dom/scene', ['exports', 'frampton-dom/utils/request_frame', 'fr
    * @memberof Frampton.DOM
    * @method
    * @param {Element} rootNode The node to attach our scene to
+   * @param {Function} messages A function to handle events in the DOM
    * @returns {Function} A function to schedule updates
    */
-  function scene(rootNode) {
+  function scene(rootNode, messages) {
 
     var savedDOM = null;
     var scheduledDOM = null;
     var state = STATES.NOTHING;
 
     function draw() {
-      (0, _update2.default)(rootNode, savedDOM, scheduledDOM);
+      (0, _update2.default)({
+        rootNode: rootNode,
+        messages: messages,
+        oldTree: savedDOM,
+        newTree: scheduledDOM
+      });
       savedDOM = scheduledDOM;
       state = STATES.NOTHING;
     }
@@ -1607,13 +1681,15 @@ define('frampton-dom/scene', ['exports', 'frampton-dom/utils/request_frame', 'fr
     };
   }
 });
-define('frampton-dom/update', ['exports', 'frampton-dom/diff', 'frampton-dom/ops/apply_patch', 'frampton-dom/ops/apply_globals'], function (exports, _diff, _apply_patch, _apply_globals) {
+define('frampton-dom/update', ['exports', 'frampton-utils/noop', 'frampton-dom/diff', 'frampton-dom/ops/apply_patch', 'frampton-dom/ops/apply_globals'], function (exports, _noop, _diff, _apply_patch, _apply_globals) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
   exports.default = run_update;
+
+  var _noop2 = _interopRequireDefault(_noop);
 
   var _diff2 = _interopRequireDefault(_diff);
 
@@ -1628,14 +1704,19 @@ define('frampton-dom/update', ['exports', 'frampton-dom/diff', 'frampton-dom/ops
   }
 
   /**
-   * @param {Elemnt} rootNode The element to attach this update
-   * @param {Frampton.DOM.VirtualNode} oldTree The old virtual dom
-   * @param {Frampton.DOM.VirtualNode} newTree The new virtual dom
+   * @name update
+   * @method
+   * @memberof Frampton.DOM
+   * @param {Object} config - The employee who is responsible for the project.
+   * @param {Element} config.rootNode - The name of the employee.
+   * @param {Function} config.messages - The employee's department.
+   * @param {Frampton.DOM.VirtualNode} config.oldTree The old virtual dom
+   * @param {Frampton.DOM.VirtualNode} config.newTree The new virtual dom
    */
-  function run_update(rootNode, oldTree, newTree) {
-    var patch = (0, _diff2.default)(oldTree, newTree);
-    (0, _apply_patch2.default)(patch, rootNode, rootNode);
-    (0, _apply_globals2.default)(rootNode);
+  function run_update(config) {
+    var patch = (0, _diff2.default)(config.oldTree, config.newTree);
+    (0, _apply_patch2.default)(patch, config.messages || _noop2.default, config.rootNode, config.rootNode);
+    (0, _apply_globals2.default)(config.rootNode);
   }
 });
 define('frampton-dom/utils/diff_class', ['exports', 'frampton-list/length', 'frampton-dom/utils/empty_class', 'frampton-dom/utils/validated_class'], function (exports, _length, _empty_class, _validated_class) {

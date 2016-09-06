@@ -10,7 +10,7 @@ import resetChildState from 'frampton-dom/ops/reset_child_state';
  * @param {Element} parent
  * @param {Element} current
  */
-export default function apply_patch(patch, parent, current) {
+export default function apply_patch(patch, messages, parent, current) {
 
   resetChildState(current);
 
@@ -18,22 +18,22 @@ export default function apply_patch(patch, parent, current) {
   for (let key in patch) {
     if (isNumeric(key)) {
       const child = nodeAtIndex(current, key);
-      apply_patch(patch[key], current, child);
+      apply_patch(patch[key], messages, current, child);
     }
   }
 
   // Reorder child nodes
   if (patch._o) {
-    executePatch(patch._o, parent, current);
+    executePatch(patch._o, messages, parent, current);
   }
 
   // Insert new nodes
   if (patch._i) {
-    performInserts(current, patch._i);
+    performInserts(current, patch._i, messages);
   }
 
   // Patch props and text
   if (patch._p) {
-    executePatch(patch._p, parent, current);
+    executePatch(patch._p, messages, parent, current);
   }
 }

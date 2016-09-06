@@ -4,7 +4,7 @@
 export default function node_gate(node, fn) {
   return function(evt) {
     if (evt.target === node) {
-      fn(evt);
+      return fn(evt);
     }
   };
 }

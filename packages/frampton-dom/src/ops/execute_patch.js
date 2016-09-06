@@ -6,7 +6,7 @@ import insertNode from 'frampton-dom/ops/insert_node';
 import updateText from 'frampton-dom/ops/update_text';
 import applyAttributes from 'frampton-dom/ops/apply_attributes';
 
-export default function execute_patch(patch, parentNode, currentNode) {
+export default function execute_patch(patch, messages, parentNode, currentNode) {
 
   const type = patch.type;
   const update = patch.update;
@@ -17,19 +17,19 @@ export default function execute_patch(patch, parentNode, currentNode) {
       break;
 
     case PATCHES.APPEND:
-      return insertNode(parentNode, null, update);
+      return insertNode(parentNode, null, update, messages);
 
     case PATCHES.INSERT:
-      return insertNode(parentNode, currentNode, update);
+      return insertNode(parentNode, currentNode, update, messages);
 
     case PATCHES.REMOVE:
       return removeNode(currentNode);
 
     case PATCHES.REPLACE:
-      return replaceNode(currentNode, update);
+      return replaceNode(currentNode, update, messages);
 
     case PATCHES.PROPS:
-      return applyAttributes(currentNode, update);
+      return applyAttributes(currentNode, update, messages);
 
     case PATCHES.TEXT:
       return updateText(currentNode, update);

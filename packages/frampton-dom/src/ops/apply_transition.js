@@ -19,7 +19,7 @@ export default function apply_transition(node, desc) {
 
   immediate(() => {
     const endClasses = validatedClass(desc.to.class);
-    const endFrame = normalizedFrame(desc.to.style || {});
+    const endFrame = normalizedFrame(desc.to.style);
     // Force a reflow to make sure we're in a good state
     reflow(node);
     applyClasses(node, endClasses);

@@ -8,10 +8,10 @@ import createElement from 'frampton-dom/ops/create_element';
  * @param {Element} oldNode Node to replace
  * @param {VirtualNode} vnode VirtualNode representing replacement
  */
-export default function replace_node(oldNode, vnode) {
+export default function replace_node(oldNode, vnode, messages) {
   if (oldNode) {
     const parent = oldNode.parentNode;
-    const newNode = createElement(vnode);
+    const newNode = createElement(vnode, messages);
     if (parent) {
       parent.replaceChild(newNode, oldNode);
     }

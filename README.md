@@ -30,21 +30,6 @@ const el = div({ class : 'test' }, [ text('hello') ]);
 
 Each function, with the exception of text, takes two parameters. The first parameter is an object of attributes to apply to the element. The second is an array of children. The text function creates text nodes and only takes the string to display.
 
-### Events
-
-Adding event listeners is done declaratively.
-
-```
-const { div, text } = Frampton.DOM.Html;
-
-function clickHandler(evt) {
-  console.log('hey, a click');
-}
-
-// Create a div
-const el = div({ onClick : clickHandler }, [ text('hello') ]);
-```
-
 ### Transitions
 
 You can declaratively apply transitions to elements.
@@ -111,7 +96,11 @@ const newTree = div({ class : 'test' }, [ text('hello') ]);
 // The update function takes a root element to attach your virtual DOM to, the
 // old virtual DOM to diff against and the new virtual DOM to apply.
 // Initially we don't have an old tree.
-update(rootElement, null, newTree);
+update({
+  rootNode : rootElement,
+  oldTree : null,
+  newTree : newTree
+});
 ```
 
 ## Scenes
@@ -132,6 +121,78 @@ scheduler(tree);
 const newTree = div({ class : 'test' }, [ text('hello world') ]);
 
 scheduler(newTree);
+```
+
+
+## Events
+
+Event handling in Frampton is usually done with event delegation. You attach event handlers to selectors and Frampton delegates for you.
+
+```
+const onSelector = Frampton.Events.onSelector;
+
+// clicks :: Signal DomEvent
+const clicks = onSelector('click', '.submit-button');
+```
+
+This will obviously still work with the Virtual DOM. No changes needed. You can also apply event handlers directly to the Virtual DOM. When applying event handlers to the Virtual DOM what you are really doing is applying a mapping function to the event object. The value returned from the mapping function is returned to you in a global callback for the Virtual DOM.
+
+This global callback is given as a parameter to the update or scene function.
+
+```
+const scene = Frampton.DOM.scene;
+const { div, text } = Frampton.DOM.Html;
+const rootElement = document.body;
+
+const globalCallback = (node) => {
+  console.log('an event happened on: ', node);
+};
+
+const scheduler = scene(rootElement, globalCallback);
+
+const clickHandler = (evt) => {
+  evt.preventDefault();
+  evt.stopPropagation();
+  return evt.target;
+}
+
+const tree = div({ class : 'test', onClick : clickHandler }, [ text('hello') ]);
+
+scheduler(tree);
+```
+
+This becomes more useful when you handlers map the events to semantic messages that mean something to your application.
+
+```
+const scene = Frampton.DOM.scene;
+const { input } = Frampton.DOM.Html;
+const rootElement = document.body;
+
+const globalCallback = (message) => {
+  switch(message.type) {
+    case 'RunSearch':
+      const url = `http://fake.com/api/search/${message.data}`;
+      $.get(url).then(handleSuccess, handleError);
+      break;
+
+    default:
+      console.log(`Unknown message received: ${message.type}`);
+  }
+};
+
+const scheduler = scene(rootElement, globalCallback);
+
+const inputHandler = (evt) => ({
+  type : 'RunSearch',
+  data : evt.target.value
+});
+
+const tree =
+  div({ class : 'search-wrapper' }, [
+    input({ type : 'text', class : 'search-box', onInput : inputHandler })
+  ]);
+
+scheduler(tree);
 ```
 
 
