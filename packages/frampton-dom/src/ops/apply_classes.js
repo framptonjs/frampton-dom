@@ -1,9 +1,18 @@
 export default function apply_classes(node, diff) {
-  if (diff.remove && (diff.remove.length > 0)) {
-    node.classList.remove(...diff.remove);
+  const toAdd = (diff.add || []);
+  const toRemove = (diff.remove || []);
+  const addLen = toAdd.length;
+  const removeLen = toRemove.length;
+
+  if (removeLen > 0) {
+    for (let i = 0; i < removeLen; i++) {
+      node.classList.remove(toRemove[i]);
+    }
   }
 
-  if (diff.add && (diff.add.length > 0)) {
-    node.classList.add(...diff.add);
+  if (addLen > 0) {
+    for (let i = 0; i < addLen; i++) {
+      node.classList.add(toAdd[i]);
+    }
   }
 }

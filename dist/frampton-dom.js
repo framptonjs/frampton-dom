@@ -989,30 +989,22 @@ define("frampton-dom/ops/apply_classes", ["exports"], function (exports) {
     value: true
   });
   exports.default = apply_classes;
-
-  function _toConsumableArray(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
-        arr2[i] = arr[i];
-      }
-
-      return arr2;
-    } else {
-      return Array.from(arr);
-    }
-  }
-
   function apply_classes(node, diff) {
-    if (diff.remove && diff.remove.length > 0) {
-      var _node$classList;
+    var toAdd = diff.add || [];
+    var toRemove = diff.remove || [];
+    var addLen = toAdd.length;
+    var removeLen = toRemove.length;
 
-      (_node$classList = node.classList).remove.apply(_node$classList, _toConsumableArray(diff.remove));
+    if (removeLen > 0) {
+      for (var i = 0; i < removeLen; i++) {
+        node.classList.remove(toRemove[i]);
+      }
     }
 
-    if (diff.add && diff.add.length > 0) {
-      var _node$classList2;
-
-      (_node$classList2 = node.classList).add.apply(_node$classList2, _toConsumableArray(diff.add));
+    if (addLen > 0) {
+      for (var _i = 0; _i < addLen; _i++) {
+        node.classList.add(toAdd[_i]);
+      }
     }
   }
 });
