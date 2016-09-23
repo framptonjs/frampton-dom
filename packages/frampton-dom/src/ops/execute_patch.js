@@ -10,8 +10,9 @@ export default function execute_patch(patch, messages, parentNode, currentNode) 
 
   const type = patch.type;
   const update = patch.update;
+  const vnode = patch.node;
 
-  switch (patch.type) {
+  switch (type) {
 
     case PATCHES.NONE:
       break;
@@ -29,7 +30,7 @@ export default function execute_patch(patch, messages, parentNode, currentNode) 
       return replaceNode(currentNode, update, messages);
 
     case PATCHES.PROPS:
-      return applyAttributes(currentNode, update, messages);
+      return applyAttributes(currentNode, vnode, update, messages);
 
     case PATCHES.TEXT:
       return updateText(currentNode, update);

@@ -23,7 +23,9 @@ export default function VirtualNode(name, attrs, children) {
     throw new Error('VirtualNode must have a string name');
   }
 
-  if (isArray(attrs)) { children = attrs; }
+  if (isArray(attrs)) {
+    children = attrs;
+  }
 
   attrs = isObject(attrs) ? attrs : noAttributes;
   children = isArray(children) ? children : noChildren;
@@ -35,6 +37,7 @@ export default function VirtualNode(name, attrs, children) {
     tagName : name,
     attributes : attrs,
     children : children,
-    length : length(children)
+    length : length(children),
+    mappings : []
   };
 }

@@ -22,7 +22,7 @@ export default function create_element(vnode, messages) {
   const children = vnode.children;
   const len = children.length;
   const node = doc.createElement(vnode.tagName);
-  applyAttributes(node, vnode.attributes, messages);
+  applyAttributes(node, vnode, vnode.attributes, messages);
 
   for (let i = 0; i < len; i++) {
     const childNode = create_element(children[i], messages);

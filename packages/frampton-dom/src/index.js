@@ -3,6 +3,7 @@ import Frampton from 'frampton/namespace';
 import diff from 'frampton-dom/diff';
 import update from 'frampton-dom/update';
 import scene from 'frampton-dom/scene';
+import map from 'frampton-dom/map';
 
 import {
   node, text,
@@ -32,6 +33,7 @@ Frampton.DOM.VERSION = '{-- VERSION_PLACEHOLDER --}';
 Frampton.DOM.diff    = diff;
 Frampton.DOM.update  = update;
 Frampton.DOM.scene   = scene;
+Frampton.DOM.map     = map;
 
 /**
  * @name Html

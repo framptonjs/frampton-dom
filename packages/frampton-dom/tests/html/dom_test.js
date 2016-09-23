@@ -11,7 +11,8 @@ QUnit.test('Should corectly construct a VirtualNode', function(assert) {
     tagName : 'div',
     attributes : {},
     children : [],
-    length : 0
+    length : 0,
+    mappings : []
   };
   assert.deepEqual(actual, expected);
 });
@@ -25,7 +26,8 @@ QUnit.test('Should corectly assign defaults', function(assert) {
     tagName : 'div',
     attributes : {},
     children : [],
-    length : 0
+    length : 0,
+    mappings : []
   };
   assert.deepEqual(actual, expected);
 });
@@ -51,10 +53,12 @@ QUnit.test('Should corectly handle children', function(assert) {
             text : 'test'
           }
         ],
-        length : 1
+        length : 1,
+        mappings : []
       }
     ],
-    length : 1
+    length : 1,
+    mappings : []
   };
   assert.deepEqual(actual, expected);
 });

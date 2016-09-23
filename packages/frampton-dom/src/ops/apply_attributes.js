@@ -21,10 +21,11 @@ const blacklist =
 /**
  * @name applyAttributes
  * @param {Element} node Dom element to apply attributes to
+ * @param {VirtualNode} vnode VirtualNode representing this node
  * @param {Object} attrs Hash of attributes to apply
  * @param {Functon} messages Function to handle events
  */
-export default function apply_attributes(node, attrs, messages) {
+export default function apply_attributes(node, vnode, attrs, messages) {
 
   for (const name in attrs) {
     const value = attrs[name];
@@ -66,7 +67,7 @@ export default function apply_attributes(node, attrs, messages) {
         node.innerHTML = value;
 
       } else if (isEvent(name)) {
-        addEvent(name, node, messages, value);
+        addEvent(name, node, messages, vnode.mappings, value);
 
       } else if (!contains(blacklist, name)) {
         node.setAttribute(name, value);

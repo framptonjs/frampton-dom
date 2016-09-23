@@ -37,7 +37,7 @@ function diffTrees(oldTree, newTree) {
       if (isSameNode(oldTree, newTree)) {
         const pDiff = propsDiff(oldTree, newTree);
         if (isSomething(pDiff)) {
-          newPatch = props(null, pDiff);
+          newPatch = props(newTree, pDiff);
         }
         patch = diffChildren(oldTree, newTree);
       } else {
@@ -125,7 +125,7 @@ function diffChildren(oldNode, newNode) {
           orderMap[i] = i;
           const pDiff = propsDiff(oldChild, newChild);
           if (isSomething(pDiff)) {
-            newPatch = props(null, pDiff);
+            newPatch = props(newChild, pDiff);
           }
           patch = diffChildren(oldChild, newChild);
         } else {
@@ -195,7 +195,7 @@ function diffChildren(oldNode, newNode) {
           orderMap[i] = newIndex;
           const pDiff = propsDiff(oldChild, newChildren[newIndex]);
           if (isSomething(pDiff)) {
-            newPatch = props(null, pDiff);
+            newPatch = props(newChildren[newIndex], pDiff);
           }
           patch = diffChildren(oldChild, newChildren[newIndex]);
 
@@ -217,25 +217,17 @@ function diffChildren(oldNode, newNode) {
       // This is going to be dirty somehow
       dirty = true;
 
-      if (isDefined(newKeys)) {
-        // Index of old node in new DOM
-        newIndex = newKeys[oldChild.key];
+      // Index of old node in new DOM
+      newIndex = newKeys[oldChild.key];
 
-        if (isDefined(newIndex)) {
-          dirty = true;
-          orderMap[i] = newIndex;
-          const pDiff = propsDiff(oldChild, newChildren[newIndex]);
-          if (isSomething(pDiff)) {
-            newPatch = props(null, pDiff);
-          }
-          patch = diffChildren(oldChild, newChildren[newIndex]);
-        } else {
-          if (oldChild.attributes.transitionOut) {
-            orderMap[i] = remove(null, oldChild.attributes.transitionOut);
-          } else {
-            orderMap[i] = undefined;
-          }
+      if (isDefined(newIndex)) {
+        dirty = true;
+        orderMap[i] = newIndex;
+        const pDiff = propsDiff(oldChild, newChildren[newIndex]);
+        if (isSomething(pDiff)) {
+          newPatch = props(newChildren[newIndex], pDiff);
         }
+        patch = diffChildren(oldChild, newChildren[newIndex]);
       } else {
         if (oldChild.attributes.transitionOut) {
           orderMap[i] = remove(null, oldChild.attributes.transitionOut);

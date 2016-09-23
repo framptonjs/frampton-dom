@@ -12,11 +12,11 @@ import makeHandler from 'frampton-dom/events/utils/make_handler';
  * @param {Element} node
  * @param {Function} handler
  */
-export default function add_event(name, node, messages, decorator) {
+export default function add_event(name, node, messages, mappings, decorator) {
   name = (EVENT_MAP[name] || name);
   immediate(() => {
 
-    var handler = makeHandler(messages, decorator);
+    var handler = makeHandler(messages, mappings, decorator);
 
     // Transitionend events will not be fired for child nodes. The event must occur on this node.
     if (name === 'transitionend') {

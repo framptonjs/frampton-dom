@@ -156,7 +156,10 @@ const clickHandler = (evt) => {
   return evt.target;
 }
 
-const tree = div({ class : 'test', onClick : clickHandler }, [ text('hello') ]);
+const tree =
+  div({ class : 'test', onClick : clickHandler }, [
+    text('hello')
+  ]);
 
 scheduler(tree);
 ```
@@ -165,7 +168,7 @@ This becomes more useful when you handlers map the events to semantic messages t
 
 ```
 const scene = Frampton.DOM.scene;
-const { input } = Frampton.DOM.Html;
+const { div, input } = Frampton.DOM.Html;
 const rootElement = document.body;
 
 const globalCallback = (message) => {
@@ -195,6 +198,61 @@ const tree =
 scheduler(tree);
 ```
 
+### Frampton.DOM.map
+
+You can also map values before they are passed to the global event handler. Say you have a child view whose events you want to tag with some indicator of what parent view they belong to.
+
+```
+const scene = Frampton.DOM.scene;
+const { div, header, input } = Frampton.DOM.Html;
+const rootElement = document.body;
+
+const mapping = (message) => {
+  return {
+    type : 'HeaderSearch',
+    data : message.data
+  };
+};
+
+const globalCallback = (message) => {
+  switch(message.type) {
+    case 'RunSearch':
+      const url = `http://fake.com/api/search/${message.data}`;
+      $.get(url).then(handleSuccess, handleError);
+      break;
+
+    case 'HeaderSearch':
+      cosnt url = `http://fake.com/api/header-search/${message.data}`;
+      $.get(url).then(handleSuccess, handleError);
+      break;
+
+    default:
+      console.log(`Unknown message received: ${message.type}`);
+  }
+};
+
+const scheduler = scene(rootElement, globalCallback);
+
+const inputHandler = (evt) => ({
+  type : 'RunSearch',
+  data : evt.target.value
+});
+
+const search =
+  div({ class : 'search-wrapper' }, [
+    input({ type : 'text', class : 'search-box', onInput : inputHandler })
+  ]);
+
+const tree =
+  header({ class : 'main-header' }, [
+    div({ class : 'header-search' }, [
+      map(mapping, search)
+    ])
+  ]);
+
+scheduler(tree);
+```
+
 
 ## Finding the Difference in Trees
 
@@ -205,8 +263,8 @@ const update = Frampton.DOM.update;
 const { div, text } = Frampton.DOM.Html;
 const rootElement = document.body;
 
-// By using the same keys for each tree the nodes will just be updated. If the
-// keys were different the DOM nodes would be replaced.
+// By using the same keys for each tree the nodes will just be updated.
+// If the keys were different the DOM nodes would be replaced.
 const treeOne =
   div({ key : 1, class : 'test' }, [
     div({ key : 2}, [ text('hello') ]
@@ -217,8 +275,8 @@ const treeTwo =
     div({ key : 2}, [ text('hello world') ]
   ]);
 
-// The update function takes a root element to attach your virtual DOM to, the
-// old virtual DOM to diff against and the new virtual DOM to apply.
+// The update function takes a root element to attach your virtual DOM to,
+// the old virtual DOM to diff against and the new virtual DOM to apply.
 // Initially we don't have an old tree.
 update(rootElement, treeOne, treeTwo);
 ```

@@ -14,7 +14,7 @@ var global = this;
 
 }());
 
-define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom/update', 'frampton-dom/scene', 'frampton-dom/html/dom'], function (_namespace, _diff, _update, _scene, _dom) {
+define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom/update', 'frampton-dom/scene', 'frampton-dom/map', 'frampton-dom/html/dom'], function (_namespace, _diff, _update, _scene, _map, _dom) {
   'use strict';
 
   var _namespace2 = _interopRequireDefault(_namespace);
@@ -24,6 +24,8 @@ define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom
   var _update2 = _interopRequireDefault(_update);
 
   var _scene2 = _interopRequireDefault(_scene);
+
+  var _map2 = _interopRequireDefault(_map);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -41,6 +43,7 @@ define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom
   _namespace2.default.DOM.diff = _diff2.default;
   _namespace2.default.DOM.update = _update2.default;
   _namespace2.default.DOM.scene = _scene2.default;
+  _namespace2.default.DOM.map = _map2.default;
 
   /**
    * @name Html
@@ -168,7 +171,7 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
         if ((0, _is_same_node2.default)(oldTree, newTree)) {
           var pDiff = (0, _props_diff2.default)(oldTree, newTree);
           if ((0, _is_something2.default)(pDiff)) {
-            newPatch = (0, _patch.props)(null, pDiff);
+            newPatch = (0, _patch.props)(newTree, pDiff);
           }
           patch = diffChildren(oldTree, newTree);
         } else {
@@ -258,7 +261,7 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
             orderMap[_i2] = _i2;
             var pDiff = (0, _props_diff2.default)(oldChild, newChild);
             if ((0, _is_something2.default)(pDiff)) {
-              newPatch = (0, _patch.props)(null, pDiff);
+              newPatch = (0, _patch.props)(newChild, pDiff);
             }
             patch = diffChildren(oldChild, newChild);
           } else {
@@ -328,7 +331,7 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
             orderMap[_i2] = newIndex;
             var _pDiff2 = (0, _props_diff2.default)(oldChild, newChildren[newIndex]);
             if ((0, _is_something2.default)(_pDiff2)) {
-              newPatch = (0, _patch.props)(null, _pDiff2);
+              newPatch = (0, _patch.props)(newChildren[newIndex], _pDiff2);
             }
             patch = diffChildren(oldChild, newChildren[newIndex]);
 
@@ -350,25 +353,17 @@ define('frampton-dom/diff', ['exports', 'frampton-utils/is_defined', 'frampton-u
         // This is going to be dirty somehow
         dirty = true;
 
-        if ((0, _is_defined2.default)(newKeys)) {
-          // Index of old node in new DOM
-          newIndex = newKeys[oldChild.key];
+        // Index of old node in new DOM
+        newIndex = newKeys[oldChild.key];
 
-          if ((0, _is_defined2.default)(newIndex)) {
-            dirty = true;
-            orderMap[_i2] = newIndex;
-            var _pDiff3 = (0, _props_diff2.default)(oldChild, newChildren[newIndex]);
-            if ((0, _is_something2.default)(_pDiff3)) {
-              newPatch = (0, _patch.props)(null, _pDiff3);
-            }
-            patch = diffChildren(oldChild, newChildren[newIndex]);
-          } else {
-            if (oldChild.attributes.transitionOut) {
-              orderMap[_i2] = (0, _patch.remove)(null, oldChild.attributes.transitionOut);
-            } else {
-              orderMap[_i2] = undefined;
-            }
+        if ((0, _is_defined2.default)(newIndex)) {
+          dirty = true;
+          orderMap[_i2] = newIndex;
+          var _pDiff3 = (0, _props_diff2.default)(oldChild, newChildren[newIndex]);
+          if ((0, _is_something2.default)(_pDiff3)) {
+            newPatch = (0, _patch.props)(newChildren[newIndex], _pDiff3);
           }
+          patch = diffChildren(oldChild, newChildren[newIndex]);
         } else {
           if (oldChild.attributes.transitionOut) {
             orderMap[_i2] = (0, _patch.remove)(null, oldChild.attributes.transitionOut);
@@ -444,11 +439,11 @@ define('frampton-dom/events/add_event', ['exports', 'frampton-utils/immediate', 
    * @param {Element} node
    * @param {Function} handler
    */
-  function add_event(name, node, messages, decorator) {
+  function add_event(name, node, messages, mappings, decorator) {
     name = _event_map2.default[name] || name;
     (0, _immediate2.default)(function () {
 
-      var handler = (0, _make_handler2.default)(messages, decorator);
+      var handler = (0, _make_handler2.default)(messages, mappings, decorator);
 
       // Transitionend events will not be fired for child nodes. The event must occur on this node.
       if (name === 'transitionend') {
@@ -575,9 +570,20 @@ define("frampton-dom/events/utils/make_handler", ["exports"], function (exports)
     value: true
   });
   exports.default = make_handler;
-  function make_handler(messages, decorator) {
+  /**
+   * @name makeHandler
+   * @method
+   * @private
+   * @memberof Frampton.DOM.Events.Utils
+   */
+  function make_handler(messages, mappings, decorator) {
     return function (evt) {
-      messages(decorator(evt));
+      var value = decorator(evt);
+      var len = mappings.length;
+      for (var i = 0; i < len; i++) {
+        value = mappings[i](value);
+      }
+      messages(value);
     };
   }
 });
@@ -893,6 +899,38 @@ define('frampton-dom/html/dom', ['exports', 'frampton-utils/is_array', 'frampton
     return (0, _node2.default)('td', attrs, children);
   };
 });
+define('frampton-dom/map', ['exports', 'frampton-dom/utils/is_node'], function (exports, _is_node) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  exports.default = function (mapping, tree) {
+    applyMapping(mapping, tree);
+    return tree;
+  };
+
+  var _is_node2 = _interopRequireDefault(_is_node);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function applyMapping(mapping, tree) {
+    if ((0, _is_node2.default)(tree)) {
+      var children = tree.children;
+      var len = children.length;
+      tree.mappings.push(mapping);
+      for (var i = 0; i < len; i++) {
+        var child = children[i];
+        applyMapping(mapping, child);
+      }
+    }
+  }
+});
 define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-list/contains', 'frampton-style/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/add_event', 'frampton-dom/events/remove_event'], function (exports, _is_nothing, _is_object, _warn, _contains, _apply_styles, _apply_classes, _validated_class, _validated_transition, _apply_transition, _is_event, _add_event, _remove_event) {
   'use strict';
 
@@ -937,10 +975,11 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
   /**
    * @name applyAttributes
    * @param {Element} node Dom element to apply attributes to
+   * @param {VirtualNode} vnode VirtualNode representing this node
    * @param {Object} attrs Hash of attributes to apply
    * @param {Functon} messages Function to handle events
    */
-  function apply_attributes(node, attrs, messages) {
+  function apply_attributes(node, vnode, attrs, messages) {
 
     for (var name in attrs) {
       var value = attrs[name];
@@ -974,7 +1013,7 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
         } else if (name === 'html') {
           node.innerHTML = value;
         } else if ((0, _is_event2.default)(name)) {
-          (0, _add_event2.default)(name, node, messages, value);
+          (0, _add_event2.default)(name, node, messages, vnode.mappings, value);
         } else if (!(0, _contains2.default)(blacklist, name)) {
           node.setAttribute(name, value);
         }
@@ -1205,7 +1244,7 @@ define('frampton-dom/ops/create_element', ['exports', 'frampton-dom/utils/is_tex
     var children = vnode.children;
     var len = children.length;
     var node = doc.createElement(vnode.tagName);
-    (0, _apply_attributes2.default)(node, vnode.attributes, messages);
+    (0, _apply_attributes2.default)(node, vnode, vnode.attributes, messages);
 
     for (var i = 0; i < len; i++) {
       var childNode = create_element(children[i], messages);
@@ -1249,8 +1288,9 @@ define('frampton-dom/ops/execute_patch', ['exports', 'frampton-dom/virtual/patch
 
     var type = patch.type;
     var update = patch.update;
+    var vnode = patch.node;
 
-    switch (patch.type) {
+    switch (type) {
 
       case _patch_types2.default.NONE:
         break;
@@ -1268,7 +1308,7 @@ define('frampton-dom/ops/execute_patch', ['exports', 'frampton-dom/virtual/patch
         return (0, _replace_node2.default)(currentNode, update, messages);
 
       case _patch_types2.default.PROPS:
-        return (0, _apply_attributes2.default)(currentNode, update, messages);
+        return (0, _apply_attributes2.default)(currentNode, vnode, update, messages);
 
       case _patch_types2.default.TEXT:
         return (0, _update_text2.default)(currentNode, update);
@@ -2372,7 +2412,8 @@ define('frampton-dom/virtual/node', ['exports', 'frampton-list/length', 'frampto
       tagName: name,
       attributes: attrs,
       children: children,
-      length: (0, _length2.default)(children)
+      length: (0, _length2.default)(children),
+      mappings: []
     };
   }
 });
