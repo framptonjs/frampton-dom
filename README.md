@@ -1,5 +1,7 @@
 # Frampton-DOM
 
+[![Build Status](https://semaphoreci.com/api/v1/beatniklarry/frampton-dom/branches/master/badge.svg)](https://semaphoreci.com/beatniklarry/frampton-dom)
+
 A virtual DOM library for use with frampton.js
 
 ### Install
