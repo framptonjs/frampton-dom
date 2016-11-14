@@ -1638,7 +1638,7 @@ define("frampton-dom/ops/update_text", ["exports"], function (exports) {
    * @param {String} text New text to display
    */
   function update_text(node, text) {
-    if (node && node.textContent) {
+    if (node && node.textContent !== undefined) {
       node.textContent = text;
     }
   }
