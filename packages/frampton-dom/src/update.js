@@ -7,9 +7,9 @@ import applyGlobals from 'frampton-dom/ops/apply_globals';
  * @name update
  * @method
  * @memberof Frampton.DOM
- * @param {Object} config - The employee who is responsible for the project.
- * @param {Element} config.rootNode - The name of the employee.
- * @param {Function} config.messages - The employee's department.
+ * @param {Object} config
+ * @param {Element} config.rootNode - Node to draw inside of.
+ * @param {Function} config.messages - Callback for events.
  * @param {Frampton.DOM.VirtualNode} config.oldTree The old virtual dom
  * @param {Frampton.DOM.VirtualNode} config.newTree The new virtual dom
  */

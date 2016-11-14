@@ -27,10 +27,10 @@ export default function scene(rootNode, messages) {
 
   function draw() {
     update({
-      rootNode : rootNode,
-      messages : messages,
-      oldTree : savedDOM,
-      newTree : scheduledDOM
+      rootNode: rootNode,
+      messages: messages,
+      oldTree: savedDOM,
+      newTree: scheduledDOM
     });
     savedDOM = scheduledDOM;
     state = STATES.NOTHING;

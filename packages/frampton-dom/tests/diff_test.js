@@ -4,7 +4,7 @@ import { div, article, ul, li, p, text } from 'frampton-dom/html/dom';
 
 QUnit.module('Frampton.DOM.diff');
 
-QUnit.test('Should return empty array for no diff', function(assert) {
+QUnit.test('returns empty array for no diff', function(assert) {
   const div_1 = div({ key : 'id-1' }, []);
   const div_2 = div({ key : 'id-1' }, []);
   const actual = diff(div_1, div_2);
@@ -13,7 +13,7 @@ QUnit.test('Should return empty array for no diff', function(assert) {
   assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should return empty array for same reference', function(assert) {
+QUnit.test('returns empty array for same reference', function(assert) {
   const div_1 = div({ key : 'id-1' }, []);
   const actual = diff(div_1, div_1);
   const expected = [[]];
@@ -21,7 +21,7 @@ QUnit.test('Should return empty array for same reference', function(assert) {
   assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff two unkeyed divs', function(assert) {
+QUnit.test('correctly diffs two unkeyed divs', function(assert) {
 
   const div_1 = div({}, []);
   const div_2 = div({}, [ div() ]);
@@ -61,7 +61,7 @@ QUnit.test('Should correctly diff two unkeyed divs', function(assert) {
   assert.deepEqual(actual, [expected]);
 });
 
-QUnit.test('Should correctly diff two nested lists', function(assert) {
+QUnit.test('correctly diffs two nested lists', function(assert) {
 
   const div_1 = div({ key : 'div-1' }, [
     article({ key : 'main-content' }, [
