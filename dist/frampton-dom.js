@@ -992,6 +992,8 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
             node.removeAttribute('data-fr-dom-focus');
           } else if (name === 'html') {
             node.innerHTML = '';
+          } else if (name === 'value') {
+            node.value = '';
           } else {
             node.removeAttribute(name);
           }
@@ -1012,6 +1014,8 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
           node.setAttribute('data-fr-dom-focus', value);
         } else if (name === 'html') {
           node.innerHTML = value;
+        } else if (name === 'value') {
+          node.value = value;
         } else if ((0, _is_event2.default)(name)) {
           (0, _add_event2.default)(name, node, messages, vnode.mappings, value);
         } else if (!(0, _contains2.default)(blacklist, name)) {

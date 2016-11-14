@@ -40,6 +40,9 @@ export default function apply_attributes(node, vnode, attrs, messages) {
         } else if (name === 'html') {
           node.innerHTML = '';
 
+        } else if (name === 'value') {
+          node.value = '';
+
         } else {
           node.removeAttribute(name);
         }
@@ -65,6 +68,9 @@ export default function apply_attributes(node, vnode, attrs, messages) {
 
       } else if (name === 'html') {
         node.innerHTML = value;
+
+      } else if (name === 'value') {
+        node.value = value;
 
       } else if (isEvent(name)) {
         addEvent(name, node, messages, vnode.mappings, value);
