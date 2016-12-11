@@ -12,7 +12,7 @@ function handleTransition(node) {
 }
 
 export default function transitionIn(node, transition) {
+  handleTransition(node);
   node.setAttribute('data-transition-in', 'true');
   applyTransition(node, validatedTransition(transition));
-  handleTransition(node);
 }

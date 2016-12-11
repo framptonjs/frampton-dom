@@ -2,7 +2,7 @@ import isNothing from 'frampton-utils/is_nothing';
 import isObject from 'frampton-utils/is_object';
 import warn from 'frampton-utils/warn';
 import contains from 'frampton-list/contains';
-import applyStyles from 'frampton-style/apply_styles';
+import applyStyles from 'frampton-dom/ops/apply_styles';
 import applyClasses from 'frampton-dom/ops/apply_classes';
 import validatedClass from 'frampton-dom/utils/validated_class';
 import validatedTransition from 'frampton-dom/utils/validated_transition';

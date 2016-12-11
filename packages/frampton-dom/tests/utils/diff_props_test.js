@@ -75,10 +75,11 @@ QUnit.test('Should correctly diff transitions', function(assert) {
   const actual = diff(oldProps, newProps);
   const expected = {
     transition : {
+      props : [ 'color' ],
       to : {
         class : {
-          add : ['forward'],
-          remove : ['walk']
+          add : [ 'forward' ],
+          remove : [ 'walk' ]
         },
         style : {
           background : undefined,

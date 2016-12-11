@@ -3,8 +3,8 @@ import contains from 'frampton-list/contains';
 import easing from 'frampton-dom/utils/easing';
 
 const alias_mapping = {
-  'duration' : 'transition-duration',
-  'delay' : 'transition-delay'
+  duration: 'transition-duration',
+  delay: 'transition-delay'
 };
 
 const durations = contains(

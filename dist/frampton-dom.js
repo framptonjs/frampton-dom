@@ -931,7 +931,7 @@ define('frampton-dom/map', ['exports', 'frampton-dom/utils/is_node'], function (
     }
   }
 });
-define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-list/contains', 'frampton-style/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/add_event', 'frampton-dom/events/remove_event'], function (exports, _is_nothing, _is_object, _warn, _contains, _apply_styles, _apply_classes, _validated_class, _validated_transition, _apply_transition, _is_event, _add_event, _remove_event) {
+define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-list/contains', 'frampton-dom/ops/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/add_event', 'frampton-dom/events/remove_event'], function (exports, _is_nothing, _is_object, _warn, _contains, _apply_styles, _apply_classes, _validated_class, _validated_transition, _apply_transition, _is_event, _add_event, _remove_event) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -1136,7 +1136,7 @@ define('frampton-dom/ops/apply_patch', ['exports', 'frampton-utils/is_numeric', 
     }
   }
 });
-define('frampton-dom/ops/apply_styles', ['exports', 'frampton-style/set_style'], function (exports, _set_style) {
+define('frampton-dom/ops/apply_styles', ['exports', 'frampton-utils/is_something', 'frampton-style/set_style', 'frampton-style/remove_style'], function (exports, _is_something, _set_style, _remove_style) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -1144,7 +1144,11 @@ define('frampton-dom/ops/apply_styles', ['exports', 'frampton-style/set_style'],
   });
   exports.default = apply_styles;
 
+  var _is_something2 = _interopRequireDefault(_is_something);
+
   var _set_style2 = _interopRequireDefault(_set_style);
+
+  var _remove_style2 = _interopRequireDefault(_remove_style);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -1152,16 +1156,30 @@ define('frampton-dom/ops/apply_styles', ['exports', 'frampton-style/set_style'],
     };
   }
 
-  function apply_styles(node, props) {
+  function apply_styles(node, props, isTransition) {
     for (var key in props) {
       var value = props[key];
-      if (key === 'height' && value === 'auto') {} else if (key === 'width' && value === 'auto') {} else {
+      if (isTransition && key === 'height' && value === 'auto') {
+        var firstChild = node.firstElementChild;
+        if (firstChild) {
+          var height = firstChild.offsetHeight;
+          (0, _set_style2.default)(node, 'height', height + 'px');
+        }
+      } else if (isTransition && key === 'width' && value === 'auto') {
+        var _firstChild = node.firstElementChild;
+        if (_firstChild) {
+          var width = _firstChild.offsetWidth;
+          (0, _set_style2.default)(node, 'width', width + 'px');
+        }
+      } else if ((0, _is_something2.default)(value)) {
         (0, _set_style2.default)(node, key, value);
+      } else {
+        (0, _remove_style2.default)(node, key);
       }
     }
   }
 });
-define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/apply_styles', 'frampton-dom/utils/reflow', 'frampton-dom/utils/normalized_frame', 'frampton-utils/immediate', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class'], function (exports, _apply_styles, _reflow, _normalized_frame, _immediate, _apply_classes, _validated_class) {
+define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/set_style', 'frampton-style/remove_style', 'frampton-dom/utils/reflow', 'frampton-dom/utils/normalized_frame', 'frampton-utils/immediate', 'frampton-dom/ops/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class'], function (exports, _set_style, _remove_style, _reflow, _normalized_frame, _immediate, _apply_styles, _apply_classes, _validated_class) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -1169,13 +1187,17 @@ define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/apply_st
   });
   exports.default = apply_transition;
 
-  var _apply_styles2 = _interopRequireDefault(_apply_styles);
+  var _set_style2 = _interopRequireDefault(_set_style);
+
+  var _remove_style2 = _interopRequireDefault(_remove_style);
 
   var _reflow2 = _interopRequireDefault(_reflow);
 
   var _normalized_frame2 = _interopRequireDefault(_normalized_frame);
 
   var _immediate2 = _interopRequireDefault(_immediate);
+
+  var _apply_styles2 = _interopRequireDefault(_apply_styles);
 
   var _apply_classes2 = _interopRequireDefault(_apply_classes);
 
@@ -1187,25 +1209,52 @@ define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/apply_st
     };
   }
 
+  function setupTransitionEnd(node, endFrame) {
+    function eventHandler(evt) {
+      if (evt.target === node) {
+        if (endFrame.height === 'auto') {
+          (0, _set_style2.default)(node, 'height', 'auto');
+        }
+
+        if (endFrame.width === 'auto') {
+          (0, _set_style2.default)(node, 'width', 'auto');
+        }
+
+        node.removeEventListener('transitionend', eventHandler);
+        node.removeAttribute('data-transition');
+        (0, _remove_style2.default)(node, 'transition-property');
+      }
+    }
+
+    node.addEventListener('transitionend', eventHandler);
+  }
+
   /**
    * @name applyTransition
    * @param {Element} node Dom element to apply transition to
    * @param {Object} desc An object describing the transition to make
    */
   function apply_transition(node, desc) {
-
+    var props = desc.props.join(',');
     var startClasses = (0, _validated_class2.default)(desc.from.class);
     var startFrame = (0, _normalized_frame2.default)(desc.from.style);
-    (0, _apply_classes2.default)(node, startClasses);
-    (0, _apply_styles2.default)(node, startFrame);
 
     (0, _immediate2.default)(function () {
-      var endClasses = (0, _validated_class2.default)(desc.to.class);
-      var endFrame = (0, _normalized_frame2.default)(desc.to.style);
+      (0, _apply_classes2.default)(node, startClasses);
+      (0, _apply_styles2.default)(node, startFrame, true);
+      (0, _set_style2.default)(node, 'transition-property', props);
+      node.setAttribute('data-transition', 'true');
       // Force a reflow to make sure we're in a good state
       (0, _reflow2.default)(node);
-      (0, _apply_classes2.default)(node, endClasses);
-      (0, _apply_styles2.default)(node, endFrame);
+
+      (0, _immediate2.default)(function () {
+        var endClasses = (0, _validated_class2.default)(desc.to.class);
+        var endFrame = (0, _normalized_frame2.default)(desc.to.style);
+
+        setupTransitionEnd(node, endFrame);
+        (0, _apply_classes2.default)(node, endClasses);
+        (0, _apply_styles2.default)(node, endFrame, true);
+      });
     });
   }
 });
@@ -1947,6 +1996,7 @@ define('frampton-dom/utils/empty_transition', ['exports', 'frampton-dom/utils/em
 
   function empty_transition() {
     return {
+      props: [],
       from: {
         class: (0, _empty_class2.default)(),
         style: {}
@@ -2078,8 +2128,8 @@ define('frampton-dom/utils/normalized_frame', ['exports', 'frampton-utils/is_num
   }
 
   var alias_mapping = {
-    'duration': 'transition-duration',
-    'delay': 'transition-delay'
+    duration: 'transition-duration',
+    delay: 'transition-delay'
   };
 
   var durations = (0, _contains2.default)(['transition-duration', 'transition-delay']);
@@ -2211,9 +2261,9 @@ define('frampton-dom/utils/transition_in', ['exports', 'frampton-dom/ops/apply_t
   }
 
   function transitionIn(node, transition) {
+    handleTransition(node);
     node.setAttribute('data-transition-in', 'true');
     (0, _apply_transition2.default)(node, (0, _validated_transition2.default)(transition));
-    handleTransition(node);
   }
 });
 define('frampton-dom/utils/transition_out', ['exports', 'frampton-dom/ops/remove_node', 'frampton-dom/ops/apply_transition', 'frampton-dom/utils/validated_transition'], function (exports, _remove_node, _apply_transition, _validated_transition) {
@@ -2247,10 +2297,10 @@ define('frampton-dom/utils/transition_out', ['exports', 'frampton-dom/ops/remove
   }
 
   function transitionOut(node, transition) {
+    handleTransition(node);
     node.removeAttribute('data-transition-in');
     node.setAttribute('data-transition-out', 'true');
     (0, _apply_transition2.default)(node, (0, _validated_transition2.default)(transition));
-    handleTransition(node);
   }
 });
 define('frampton-dom/utils/validated_class', ['exports', 'frampton-utils/is_array', 'frampton-utils/is_string', 'frampton-utils/is_object', 'frampton-dom/utils/not_empty', 'frampton-dom/utils/empty_class'], function (exports, _is_array, _is_string, _is_object, _not_empty, _empty_class) {
@@ -2329,6 +2379,10 @@ define('frampton-dom/utils/validated_transition', ['exports', 'frampton-dom/util
     };
   }
 
+  function shouldAddProp(transition, prop) {
+    return transition.props.indexOf(prop) === -1 && prop.indexOf('transition') === -1;
+  }
+
   function validated_transition(desc) {
 
     if (!desc) {
@@ -2353,6 +2407,18 @@ define('frampton-dom/utils/validated_transition', ['exports', 'frampton-dom/util
 
       if (desc.style) {
         newTransition.to.style = (0, _normalized_frame2.default)(desc.style || {});
+      }
+
+      for (var key in newTransition.to.style) {
+        if (shouldAddProp(newTransition, key)) {
+          newTransition.props.push(key);
+        }
+      }
+
+      for (var _key in newTransition.from.style) {
+        if (shouldAddProp(newTransition, _key)) {
+          newTransition.props.push(_key);
+        }
       }
 
       return newTransition;

@@ -13,8 +13,8 @@ function handleTransition(node) {
 }
 
 export default function transitionOut(node, transition) {
+  handleTransition(node);
   node.removeAttribute('data-transition-in');
   node.setAttribute('data-transition-out', 'true');
   applyTransition(node, validatedTransition(transition));
-  handleTransition(node);
 }
