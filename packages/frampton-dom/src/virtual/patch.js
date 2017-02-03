@@ -12,10 +12,10 @@ import TYPES from 'frampton-dom/virtual/patch_types';
  */
 function VirtualPatch(type, node, update) {
   return {
-    ctor : 'VirtualPatch',
-    type : type,
-    node : node,
-    update : update
+    ctor: 'VirtualPatch',
+    type: type,
+    node: node,
+    update: update
   };
 }
 

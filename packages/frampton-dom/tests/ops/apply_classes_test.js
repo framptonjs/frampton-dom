@@ -2,7 +2,7 @@ import applyClasses from 'frampton-dom/ops/apply_classes';
 
 QUnit.module('Frampton.DOM.Ops.applyClasses');
 
-QUnit.test('Should correctly add classes to element', function(assert) {
+QUnit.test('correctly adds classes to element', function(assert) {
 
   const div = document.createElement('div');
   const diff = {
@@ -13,7 +13,7 @@ QUnit.test('Should correctly add classes to element', function(assert) {
   assert.ok(div.classList.contains('this'));
 });
 
-QUnit.test('Should correctly remove classes from element', function(assert) {
+QUnit.test('correctly removes classes from element', function(assert) {
   const div = document.createElement('div');
   div.className = 'test this';
   const diff = {
@@ -24,7 +24,7 @@ QUnit.test('Should correctly remove classes from element', function(assert) {
   assert.ok(div.classList.contains('this'));
 });
 
-QUnit.test('Should ignore empty diffs', function(assert) {
+QUnit.test('ignores empty diffs', function(assert) {
 
   const div = document.createElement('div');
   div.className = 'test this';
@@ -37,7 +37,7 @@ QUnit.test('Should ignore empty diffs', function(assert) {
   assert.ok(div.classList.contains('this'));
 });
 
-QUnit.test('Should ignore null diffs', function(assert) {
+QUnit.test('ignores null diffs', function(assert) {
 
   const div = document.createElement('div');
   div.className = 'test this';

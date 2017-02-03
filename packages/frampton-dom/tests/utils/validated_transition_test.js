@@ -6,14 +6,18 @@ QUnit.module('Frampton.DOM.Utils.validatedTransition');
 QUnit.test('returns an empty tranition for null', function(assert) {
   const actual = validatedTransition(null);
   const expected = {
-    props : [],
-    from : {
-      class : emptyClass(),
-      style : {}
+    props: [],
+    from: {
+      class: emptyClass(),
+      style: {}
     },
-    to : {
-      class : emptyClass(),
-      style : {}
+    to: {
+      class: emptyClass(),
+      style: {}
+    },
+    cleanup: {
+      class: emptyClass(),
+      style: {}
     }
   };
 
@@ -22,22 +26,26 @@ QUnit.test('returns an empty tranition for null', function(assert) {
 
 QUnit.test('returns proper formatting for missing from/to blocks', function(assert) {
   const tansition = {
-    class : 'test',
-    style : {}
+    class: 'test',
+    style: {}
   };
   const actual = validatedTransition(tansition);
   const expected = {
-    props : [],
-    from : {
+    props: [],
+    from: {
       class : emptyClass(),
       style : {}
     },
-    to : {
-      class : {
-        add : ['test'],
-        remove : []
+    to: {
+      class: {
+        add: ['test'],
+        remove: []
       },
-      style : {}
+      style: {}
+    },
+    cleanup: {
+      class: emptyClass(),
+      style: {}
     }
   };
 
@@ -54,7 +62,6 @@ QUnit.test('correctly formats class strings', function(assert) {
       class : 'boo goo',
       style : {}
     }
-
   };
   const actual = validatedTransition(tansition);
   const expected = {
@@ -72,6 +79,10 @@ QUnit.test('correctly formats class strings', function(assert) {
         remove : []
       },
       style : {}
+    },
+    cleanup: {
+      class: emptyClass(),
+      style: {}
     }
   };
 
@@ -91,7 +102,6 @@ QUnit.test('correctly adds transitions props to props array', function(assert) {
         opacity : 0
       }
     }
-
   };
   const actual = validatedTransition(tansition);
   const expected = {
@@ -114,6 +124,10 @@ QUnit.test('correctly adds transitions props to props array', function(assert) {
         height : '10px',
         opacity : 0
       }
+    },
+    cleanup: {
+      class: emptyClass(),
+      style: {}
     }
   };
 

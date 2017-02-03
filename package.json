@@ -1,6 +1,7 @@
 {
   "name": "frampton-dom",
   "version": "0.1.4",
+  "main": "./dist/frampton-dom.js",
   "description": "A virtual-dom module for frampton.js",
   "scripts": {
     "test": "frampton test",
@@ -21,10 +22,12 @@
     "url": "https://github.com/framptonjs/frampton-dom/issues"
   },
   "homepage": "https://github.com/framptonjs/frampton-dom",
+  "dependencies": {
+    "frampton": "0.3.5"
+  },
   "devDependencies": {
-    "frampton": "0.3.1",
-    "frampton-build": "0.0.6",
-    "frampton-cli": "0.0.10",
+    "frampton-build": "0.0.7",
+    "frampton-cli": "0.0.12",
     "jsdoc": "3.4.0"
   }
 }

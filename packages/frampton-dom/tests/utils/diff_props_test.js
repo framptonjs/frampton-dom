@@ -2,7 +2,7 @@ import diff from 'frampton-dom/utils/diff_props';
 
 QUnit.module('Frampton.DOM.Utils.diffProps');
 
-QUnit.test('Should correctly diff two objects', function(assert) {
+QUnit.test('correctly diffs two objects', function(assert) {
   const oldProps = {
     one : 'one',
     two : 'two',
@@ -22,7 +22,7 @@ QUnit.test('Should correctly diff two objects', function(assert) {
   assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff nested objects', function(assert) {
+QUnit.test('correctly diffs nested objects', function(assert) {
   const oldProps = {
     one : 'one',
     two : {
@@ -55,7 +55,7 @@ QUnit.test('Should correctly diff nested objects', function(assert) {
   assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff transitions', function(assert) {
+QUnit.test('correctly diffs transitions', function(assert) {
   const oldProps = {
     transition : {
       class : 'walk on',

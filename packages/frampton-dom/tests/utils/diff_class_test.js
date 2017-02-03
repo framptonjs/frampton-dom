@@ -2,7 +2,7 @@ import diff from 'frampton-dom/utils/diff_class';
 
 QUnit.module('Frampton.DOM.Utils.diffClass');
 
-QUnit.test('Should correctly diff class strings with removes', function(assert) {
+QUnit.test('correctly diffs class strings with removes', function(assert) {
   const oldClass = 'one two three four';
   const newClass = 'one two three';
   const actual = diff(oldClass, newClass);
@@ -13,7 +13,7 @@ QUnit.test('Should correctly diff class strings with removes', function(assert) 
   assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff class strings with adds', function(assert) {
+QUnit.test('correctly diffs class strings with adds', function(assert) {
   const oldClass = 'one two three';
   const newClass = 'one two three four';
   const actual = diff(oldClass, newClass);
@@ -24,7 +24,7 @@ QUnit.test('Should correctly diff class strings with adds', function(assert) {
   assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff class strings with adds and removes', function(assert) {
+QUnit.test('correctly diffs class strings with adds and removes', function(assert) {
   const oldClass = 'one two three five';
   const newClass = 'one two three four';
   const actual = diff(oldClass, newClass);
@@ -35,7 +35,7 @@ QUnit.test('Should correctly diff class strings with adds and removes', function
   assert.deepEqual(actual, expected);
 });
 
-QUnit.test('Should correctly diff objects', function(assert) {
+QUnit.test('correctly diffs objects', function(assert) {
   const oldClass = {
     add : ['one', 'two', 'three']
   };

@@ -1179,13 +1179,15 @@ define('frampton-dom/ops/apply_styles', ['exports', 'frampton-utils/is_something
     }
   }
 });
-define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/set_style', 'frampton-style/remove_style', 'frampton-dom/utils/reflow', 'frampton-dom/utils/normalized_frame', 'frampton-utils/immediate', 'frampton-dom/ops/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class'], function (exports, _set_style, _remove_style, _reflow, _normalized_frame, _immediate, _apply_styles, _apply_classes, _validated_class) {
+define('frampton-dom/ops/apply_transition', ['exports', 'frampton-utils/guid', 'frampton-style/set_style', 'frampton-style/remove_style', 'frampton-dom/utils/reflow', 'frampton-dom/utils/normalized_frame', 'frampton-utils/immediate', 'frampton-dom/ops/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class'], function (exports, _guid, _set_style, _remove_style, _reflow, _normalized_frame, _immediate, _apply_styles, _apply_classes, _validated_class) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
   exports.default = apply_transition;
+
+  var _guid2 = _interopRequireDefault(_guid);
 
   var _set_style2 = _interopRequireDefault(_set_style);
 
@@ -1209,20 +1211,25 @@ define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/set_styl
     };
   }
 
-  function setupTransitionEnd(node, endFrame) {
+  function setupTransitionEnd(node, endFrame, id) {
     function eventHandler(evt) {
+      var target = evt.target;
+      var transitionId = target.getAttribute('data-transition');
       if (evt.target === node) {
-        if (endFrame.height === 'auto') {
-          (0, _set_style2.default)(node, 'height', 'auto');
-        }
+        if (transitionId === id) {
+          if (endFrame.height === 'auto') {
+            (0, _set_style2.default)(node, 'height', 'auto');
+          }
 
-        if (endFrame.width === 'auto') {
-          (0, _set_style2.default)(node, 'width', 'auto');
+          if (endFrame.width === 'auto') {
+            (0, _set_style2.default)(node, 'width', 'auto');
+          }
+
+          node.removeAttribute('data-transition');
+          (0, _remove_style2.default)(node, 'transition-property');
         }
 
         node.removeEventListener('transitionend', eventHandler);
-        node.removeAttribute('data-transition');
-        (0, _remove_style2.default)(node, 'transition-property');
       }
     }
 
@@ -1235,6 +1242,9 @@ define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/set_styl
    * @param {Object} desc An object describing the transition to make
    */
   function apply_transition(node, desc) {
+    // If a transition on a given node we need a unique id for each
+    // transition to know we are handling the correct one.
+    var transitionId = (0, _guid2.default)();
     var props = desc.props.join(',');
     var startClasses = (0, _validated_class2.default)(desc.from.class);
     var startFrame = (0, _normalized_frame2.default)(desc.from.style);
@@ -1243,7 +1253,7 @@ define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/set_styl
       (0, _apply_classes2.default)(node, startClasses);
       (0, _apply_styles2.default)(node, startFrame, true);
       (0, _set_style2.default)(node, 'transition-property', props);
-      node.setAttribute('data-transition', 'true');
+      node.setAttribute('data-transition', transitionId);
       // Force a reflow to make sure we're in a good state
       (0, _reflow2.default)(node);
 
@@ -1251,9 +1261,9 @@ define('frampton-dom/ops/apply_transition', ['exports', 'frampton-style/set_styl
         var endClasses = (0, _validated_class2.default)(desc.to.class);
         var endFrame = (0, _normalized_frame2.default)(desc.to.style);
 
-        setupTransitionEnd(node, endFrame);
-        (0, _apply_classes2.default)(node, endClasses);
+        setupTransitionEnd(node, endFrame, transitionId);
         (0, _apply_styles2.default)(node, endFrame, true);
+        (0, _apply_classes2.default)(node, endClasses);
       });
     });
   }
@@ -2004,6 +2014,10 @@ define('frampton-dom/utils/empty_transition', ['exports', 'frampton-dom/utils/em
       to: {
         class: (0, _empty_class2.default)(),
         style: {}
+      },
+      cleanup: {
+        class: (0, _empty_class2.default)(),
+        style: {}
       }
     };
   }
@@ -2379,8 +2393,14 @@ define('frampton-dom/utils/validated_transition', ['exports', 'frampton-dom/util
     };
   }
 
+  var BLACKLIST = ['display', 'transition', 'transition-property', 'transition-duration', 'transition-delay', 'transition-timing-function'];
+
   function shouldAddProp(transition, prop) {
-    return transition.props.indexOf(prop) === -1 && prop.indexOf('transition') === -1;
+    return transition.props.indexOf(prop) === -1 && BLACKLIST.indexOf(prop) === -1;
+  }
+
+  function isEmptyDesc(desc) {
+    return !desc.cleanup && !desc.from && !desc.to && !desc.class && !desc.style;
   }
 
   function validated_transition(desc) {
@@ -2391,22 +2411,43 @@ define('frampton-dom/utils/validated_transition', ['exports', 'frampton-dom/util
 
       var newTransition = (0, _empty_transition2.default)();
 
-      if (desc.from) {
-        newTransition.from.class = (0, _validated_class2.default)(desc.from.class);
-        newTransition.from.style = (0, _normalized_frame2.default)(desc.from.style || {});
-      }
+      if (isEmptyDesc(desc)) {
+        newTransition.to.style = (0, _normalized_frame2.default)(desc || {});
+      } else {
+        if (desc.cleanup) {
+          if (desc.cleanup.style || desc.cleanup.class) {
+            newTransition.cleanup.class = (0, _validated_class2.default)(desc.cleanup.class);
+            newTransition.cleanup.style = (0, _normalized_frame2.default)(desc.cleanup.style || {});
+          } else {
+            newTransition.cleanup.style = (0, _normalized_frame2.default)(desc.cleanup || {});
+          }
+        }
 
-      if (desc.to) {
-        newTransition.to.class = (0, _validated_class2.default)(desc.to.class);
-        newTransition.to.style = (0, _normalized_frame2.default)(desc.to.style || {});
-      }
+        if (desc.from) {
+          if (desc.from.style || desc.from.class) {
+            newTransition.from.class = (0, _validated_class2.default)(desc.from.class);
+            newTransition.from.style = (0, _normalized_frame2.default)(desc.from.style || {});
+          } else {
+            newTransition.from.style = (0, _normalized_frame2.default)(desc.from || {});
+          }
+        }
 
-      if (desc.class) {
-        newTransition.to.class = (0, _validated_class2.default)(desc.class);
-      }
+        if (desc.to) {
+          if (desc.to.style || desc.to.class) {
+            newTransition.to.class = (0, _validated_class2.default)(desc.to.class);
+            newTransition.to.style = (0, _normalized_frame2.default)(desc.to.style || {});
+          } else {
+            newTransition.to.style = (0, _normalized_frame2.default)(desc.to || {});
+          }
+        }
 
-      if (desc.style) {
-        newTransition.to.style = (0, _normalized_frame2.default)(desc.style || {});
+        if (desc.class) {
+          newTransition.to.class = (0, _validated_class2.default)(desc.class);
+        }
+
+        if (desc.style) {
+          newTransition.to.style = (0, _normalized_frame2.default)(desc.style || {});
+        }
       }
 
       for (var key in newTransition.to.style) {
