@@ -42,6 +42,9 @@ export default function apply_attributes(node, vnode, attrs, messages) {
         } else if (name === 'value') {
           node.value = '';
 
+        } else if (name === 'checked') {
+          node.checked = false;
+          
         } else {
           node.removeAttribute(name);
         }
@@ -73,6 +76,9 @@ export default function apply_attributes(node, vnode, attrs, messages) {
         node.value = value;
         node.selectionStart = cursor;
         node.selectionEnd = cursor;
+
+      } else if (name === 'checked') {
+          node.checked = true;
 
       } else if (isEvent(name)) {
         addEvent(name, node, messages, vnode.mappings, value);
