@@ -39,7 +39,7 @@ define('frampton-dom', ['frampton/namespace', 'frampton-dom/diff', 'frampton-dom
    * @memberof Frampton
    */
   _namespace2.default.DOM = {};
-  _namespace2.default.DOM.VERSION = '0.1.6';
+  _namespace2.default.DOM.VERSION = '0.1.7';
   _namespace2.default.DOM.diff = _diff2.default;
   _namespace2.default.DOM.update = _update2.default;
   _namespace2.default.DOM.scene = _scene2.default;
@@ -993,6 +993,8 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
             node.innerHTML = '';
           } else if (name === 'value') {
             node.value = '';
+          } else if (name === 'checked') {
+            node.checked = false;
           } else {
             node.removeAttribute(name);
           }
@@ -1018,6 +1020,8 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
           node.value = value;
           node.selectionStart = cursor;
           node.selectionEnd = cursor;
+        } else if (name === 'checked') {
+          node.checked = true;
         } else if ((0, _is_event2.default)(name)) {
           (0, _add_event2.default)(name, node, messages, vnode.mappings, value);
         } else if (!(0, _contains2.default)(blacklist, name)) {
@@ -1414,10 +1418,9 @@ define('frampton-dom/ops/insert_node', ['exports', 'frampton-dom/ops/create_elem
    * @param {VirtualNode} vnode
    */
   function insert_node(parent, current, vnode, messages) {
-
     var child = (0, _create_element2.default)(vnode, messages);
 
-    if (vnode.attributes.transitionIn) {
+    if (vnode.attributes && vnode.attributes.transitionIn) {
       (0, _transition_in2.default)(child, vnode.attributes.transitionIn);
     }
 
