@@ -1,0 +1,15 @@
+{
+  "name": "frampton-dom-example",
+  "version": "0.0.1",
+  "main": "./index.html",
+  "description": "Example of using frampton-dom",
+  "scripts": {
+    "clean-install": "rm -rf node_modules; npm install;"
+  },
+  "author": "Kevin Greene <hightimesteddy@gmail.com>",
+  "license": "BSD",
+  "dependencies": {
+    "frampton": "0.3.5",
+    "frampton-dom": "0.1.5"
+  }
+}

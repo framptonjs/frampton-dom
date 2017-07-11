@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+
+  <style>
+
+    ul li {
+      transition-property: opacity, height;
+      transition-duration: 1000ms;
+      display: block;
+      overflow: hidden;
+      opacity: 0;
+      height: 0;
+    }
+
+    ul li.in {
+      opacity: 1;
+      height: 20px
+    }
+
+    ul li.out {
+      opacity: 0;
+      height: 0;
+    }
+
+  </style>
+
+</head>
+<body>
+
+  <div id="fixture"></div>
+
+  <script src="./node_modules/frampton/dist/frampton.js"></script>
+  <script src="./node_modules/frampton-dom/dist/frampton-dom.js"></script>
+
+  <script>
+
+    Frampton.ENV.MODE = 'dev';
+
+    const createSignal = Frampton.Signal.create;
+    const onSelector = Frampton.Events.onSelector;
+
+    // NODE CONSTRUCTORS
+    const div = Frampton.DOM.Html.div;
+    const span = Frampton.DOM.Html.span;
+    const text = Frampton.DOM.Html.text;
+    const header = Frampton.DOM.Html.header;
+    const article = Frampton.DOM.Html.article;
+    const section = Frampton.DOM.Html.section;
+    const footer = Frampton.DOM.Html.footer;
+    const main = Frampton.DOM.Html.main;
+    const h1 = Frampton.DOM.Html.h1;
+    const h2 = Frampton.DOM.Html.h2;
+    const p = Frampton.DOM.Html.p;
+    const a = Frampton.DOM.Html.a;
+    const ul = Frampton.DOM.Html.ul;
+    const li = Frampton.DOM.Html.li;
+    const scene = Frampton.DOM.scene;
+
+    const messages = createSignal();
+    const fixture = document.getElementById('fixture');
+    const schedule = scene(fixture, messages.push);
+
+    function handler(evt) {
+      return div_2;
+    }
+
+    function handler2(evt) {
+      return div_3;
+    }
+
+    function handler3(evt) {
+      return div_4;
+    }
+
+    function handler4(evt) {
+      return div_2;
+    }
+
+    messages.next((val) => {
+      console.log('schedule: ', val);
+      schedule(val);
+    });
+
+    const transitionIn = {
+      class : 'in'
+    };
+
+    const transitionOut = {
+      class : 'out'
+    };
+
+    const div_1 = div({ key : 'div-1' }, [
+      article({ key : 'main-content' }, [
+        h1({ key : 'first-heading', onClick : handler }, [ text('First Block') ]),
+        ul({ key : 'ul-1', tabIndex : '-1', focus : true })
+      ]),
+      article({ key : 'main-content' }, [
+        h2({ key : 'second-heading', onClick : handler }, [ text('Second Block') ]),
+        ul({ key : 'ul-2', tabIndex : '-1' })
+      ]),
+      article({ key : 'html-content', html : '<div>Hi there</div>' })
+    ]);
+
+    const div_2 = div({ key : 'div-1' }, [
+      article({ key : 'main-content' }, [
+        h1({ key : 'first-heading', onClick : handler2 }, [ text('First Block 2') ]),
+        ul({ key : 'ul-1', tabIndex : '-1' }, [
+          li({ key : 'li-1', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-1')
+          ]),
+          li({ key : 'li-2', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-2')
+          ]),
+          li({ key : 'li-3', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-3')
+          ]),
+          li({ key : 'li-4', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-4')
+          ])
+        ])
+      ]),
+      article({ key : 'main-content' }, [
+        h2({ key : 'second-heading' }, [ text('Second Block 2') ]),
+        ul({ key : 'ul-2', tabIndex : '-1', focus : true }, [
+          li({ key : 'li-6', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-6')
+          ]),
+          li({ key : 'li-1', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-1')
+          ]),
+          li({ key : 'li-8', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-8')
+          ])
+        ])
+      ]),
+      article({ key : 'html-content', html : '<div>Hi there over there</div>' })
+    ]);
+
+    const div_3 = div({ key : 'div-1' }, [
+      article({ key : 'main-content' }, [
+        h1({ key : 'first-heading', onClick : handler3 }, [ text('First Block 3') ]),
+        ul({ key : 'ul-1', tabIndex : '-1', focus : true }, [
+          li({ key : 'li-2', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-2')
+          ]),
+          li({ key : 'li-3', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-3')
+          ]),
+          li({ key : 'li-4', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-4')
+          ])
+        ])
+      ]),
+      article({ key : 'main-content' }, [
+        h2({ key : 'second-heading', onClick : handler3 }, [ text('Second Block 3') ]),
+        ul({ key : 'ul-2', tabIndex : '-1' }, [
+          li({ key : 'li-6', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-6')
+          ]),
+          li({ key : 'li-2', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-2')
+          ]),
+          li({ key : 'li-5', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-5')
+          ]),
+          li({ key : 'li-4', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-4')
+          ]),
+          li({ key : 'li-7', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-7')
+          ])
+        ])
+      ])
+    ]);
+
+    const div_4 = div({ key : 'div-1' }, [
+      article({ key : 'main-content' }, [
+        h1({ key : 'first-heading', onClick : handler4 }, [ text('First Block 4') ]),
+        ul({ key : 'ul-1', tabIndex : '-1' }, [
+          li({ key : 'li-4', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-4')
+          ]),
+          li({ key : 'li-6', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-6')
+          ]),
+          li({ key : 'li-2', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-2')
+          ]),
+          li({ key : 'li-5', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-5')
+          ]),
+          li({ key : 'li-7', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-7')
+          ])
+        ])
+      ]),
+      article({ key : 'main-content' }, [
+        h2({ key : 'second-heading', onClick : handler4 }, [ text('Second Block 4') ]),
+        ul({ key : 'ul-2', tabIndex : '-1', focus : true }, [
+          li({ key : 'li-2', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-2')
+          ]),
+          li({ key : 'li-3', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-3')
+          ]),
+          li({ key : 'li-4', transitionIn : transitionIn, transitionOut : transitionOut }, [
+            text('li-4')
+          ])
+        ])
+      ]),
+      article({ key : 'html-content', html : '<div>Hi there again</div>' })
+    ]);
+
+    schedule(div_1);
+
+  </script>
+
+</body>
+</html>
