@@ -1,4 +1,5 @@
 import isNothing from 'frampton-utils/is_nothing';
+import isSomething from 'frampton-utils/is_something';
 import isObject from 'frampton-utils/is_object';
 import warn from 'frampton-utils/warn';
 import contains from 'frampton-list/contains';
@@ -44,7 +45,7 @@ export default function apply_attributes(node, vnode, attrs, messages) {
 
         } else if (name === 'checked') {
           node.checked = false;
-          
+
         } else {
           node.removeAttribute(name);
         }
@@ -72,10 +73,15 @@ export default function apply_attributes(node, vnode, attrs, messages) {
         node.innerHTML = value;
 
       } else if (name === 'value') {
-        const cursor = node.selectionStart;
-        node.value = value;
-        node.selectionStart = cursor;
-        node.selectionEnd = cursor;
+        if (isSomething(node.selectionStart)) {
+          const cursor = node.selectionStart;
+          node.value = value;
+          node.selectionStart = cursor;
+          node.selectionEnd = cursor;
+
+        } else {
+          node.value = value;
+        }
 
       } else if (name === 'checked') {
           node.checked = true;
