@@ -980,7 +980,6 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
    * @param {Functon} messages Function to handle events
    */
   function apply_attributes(node, vnode, attrs, messages) {
-
     for (var name in attrs) {
       var value = attrs[name];
       if ((0, _is_nothing2.default)(value) || value === false) {
@@ -1015,7 +1014,10 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
         } else if (name === 'html') {
           node.innerHTML = value;
         } else if (name === 'value') {
+          var cursor = node.selectionStart;
           node.value = value;
+          node.selectionStart = cursor;
+          node.selectionEnd = cursor;
         } else if ((0, _is_event2.default)(name)) {
           (0, _add_event2.default)(name, node, messages, vnode.mappings, value);
         } else if (!(0, _contains2.default)(blacklist, name)) {
@@ -1412,10 +1414,13 @@ define('frampton-dom/ops/insert_node', ['exports', 'frampton-dom/ops/create_elem
    * @param {VirtualNode} vnode
    */
   function insert_node(parent, current, vnode, messages) {
+
     var child = (0, _create_element2.default)(vnode, messages);
+
     if (vnode.attributes.transitionIn) {
       (0, _transition_in2.default)(child, vnode.attributes.transitionIn);
     }
+
     if (parent) {
       if (current) {
         parent.insertBefore(child, current);

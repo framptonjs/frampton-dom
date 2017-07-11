@@ -26,7 +26,6 @@ const blacklist =
  * @param {Functon} messages Function to handle events
  */
 export default function apply_attributes(node, vnode, attrs, messages) {
-
   for (const name in attrs) {
     const value = attrs[name];
     if (isNothing(value) || value === false) {
@@ -70,7 +69,10 @@ export default function apply_attributes(node, vnode, attrs, messages) {
         node.innerHTML = value;
 
       } else if (name === 'value') {
+        const cursor = node.selectionStart;
         node.value = value;
+        node.selectionStart = cursor;
+        node.selectionEnd = cursor;
 
       } else if (isEvent(name)) {
         addEvent(name, node, messages, vnode.mappings, value);

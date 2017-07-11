@@ -30,10 +30,12 @@
 </head>
 <body>
 
-  <div id="fixture"></div>
+  <div id="input-fixture"></div>
+
+  <div id="block-fixture"></div>
 
   <script src="./node_modules/frampton/dist/frampton.js"></script>
-  <script src="./node_modules/frampton-dom/dist/frampton-dom.js"></script>
+  <script src="../dist/frampton-dom.js"></script>
 
   <script>
 
@@ -43,25 +45,18 @@
     const onSelector = Frampton.Events.onSelector;
 
     // NODE CONSTRUCTORS
-    const div = Frampton.DOM.Html.div;
-    const span = Frampton.DOM.Html.span;
-    const text = Frampton.DOM.Html.text;
-    const header = Frampton.DOM.Html.header;
-    const article = Frampton.DOM.Html.article;
-    const section = Frampton.DOM.Html.section;
-    const footer = Frampton.DOM.Html.footer;
-    const main = Frampton.DOM.Html.main;
-    const h1 = Frampton.DOM.Html.h1;
-    const h2 = Frampton.DOM.Html.h2;
-    const p = Frampton.DOM.Html.p;
-    const a = Frampton.DOM.Html.a;
-    const ul = Frampton.DOM.Html.ul;
-    const li = Frampton.DOM.Html.li;
+    const {
+      div, span, text, header, article, section,
+      footer, main, h1, h2, p, a, ul, li, input
+    } = Frampton.DOM.Html;
     const scene = Frampton.DOM.scene;
 
-    const messages = createSignal();
-    const fixture = document.getElementById('fixture');
-    const schedule = scene(fixture, messages.push);
+    const blockMessages = createSignal();
+    const inputMessages = createSignal();
+    const inputFixture = document.getElementById('input-fixture');
+    const blockFixture = document.getElementById('block-fixture');
+    const scheduleBlocks = scene(blockFixture, blockMessages.push);
+    const scheduleInput = scene(inputFixture, inputMessages.push);
 
     function handler(evt) {
       return div_2;
@@ -79,9 +74,18 @@
       return div_2;
     }
 
-    messages.next((val) => {
+    function handler5(evt) {
+      return evt.target.value;
+    }
+
+    inputMessages.next((val) => {
+      console.log('input: ', val);
+      scheduleInput(filledInput(val));
+    });
+
+    blockMessages.next((val) => {
       console.log('schedule: ', val);
-      schedule(val);
+      scheduleBlocks(val);
     });
 
     const transitionIn = {
@@ -91,6 +95,8 @@
     const transitionOut = {
       class : 'out'
     };
+
+    const filledInput = (str) => input({ key: 'input-1', value: str, onInput: handler5 });
 
     const div_1 = div({ key : 'div-1' }, [
       article({ key : 'main-content' }, [
@@ -214,7 +220,8 @@
       article({ key : 'html-content', html : '<div>Hi there again</div>' })
     ]);
 
-    schedule(div_1);
+    scheduleBlocks(div_1);
+    scheduleInput(filledInput('start'));
 
   </script>
 
