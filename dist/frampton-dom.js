@@ -931,7 +931,7 @@ define('frampton-dom/map', ['exports', 'frampton-dom/utils/is_node'], function (
     }
   }
 });
-define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothing', 'frampton-utils/is_something', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-list/contains', 'frampton-dom/ops/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/add_event', 'frampton-dom/events/remove_event'], function (exports, _is_nothing, _is_something, _is_object, _warn, _contains, _apply_styles, _apply_classes, _validated_class, _validated_transition, _apply_transition, _is_event, _add_event, _remove_event) {
+define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothing', 'frampton-utils/is_object', 'frampton-utils/warn', 'frampton-list/contains', 'frampton-dom/ops/apply_styles', 'frampton-dom/ops/apply_classes', 'frampton-dom/utils/validated_class', 'frampton-dom/utils/validated_transition', 'frampton-dom/ops/apply_transition', 'frampton-dom/events/utils/is_event', 'frampton-dom/events/add_event', 'frampton-dom/events/remove_event'], function (exports, _is_nothing, _is_object, _warn, _contains, _apply_styles, _apply_classes, _validated_class, _validated_transition, _apply_transition, _is_event, _add_event, _remove_event) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -940,8 +940,6 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
   exports.default = apply_attributes;
 
   var _is_nothing2 = _interopRequireDefault(_is_nothing);
-
-  var _is_something2 = _interopRequireDefault(_is_something);
 
   var _is_object2 = _interopRequireDefault(_is_object);
 
@@ -1018,7 +1016,7 @@ define('frampton-dom/ops/apply_attributes', ['exports', 'frampton-utils/is_nothi
         } else if (name === 'html') {
           node.innerHTML = value;
         } else if (name === 'value') {
-          if ((0, _is_something2.default)(node.selectionStart)) {
+          if (node.type === 'text' || node.type === 'textarea') {
             var cursor = node.selectionStart;
             node.value = value;
             node.selectionStart = cursor;

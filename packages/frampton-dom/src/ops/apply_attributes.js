@@ -1,5 +1,4 @@
 import isNothing from 'frampton-utils/is_nothing';
-import isSomething from 'frampton-utils/is_something';
 import isObject from 'frampton-utils/is_object';
 import warn from 'frampton-utils/warn';
 import contains from 'frampton-list/contains';
@@ -73,7 +72,7 @@ export default function apply_attributes(node, vnode, attrs, messages) {
         node.innerHTML = value;
 
       } else if (name === 'value') {
-        if (isSomething(node.selectionStart)) {
+        if (node.type === 'text' || node.type === 'textarea') {
           const cursor = node.selectionStart;
           node.value = value;
           node.selectionStart = cursor;
