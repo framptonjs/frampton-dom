@@ -1,6 +1,6 @@
 {
   "name": "frampton-dom",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "main": "./dist/frampton-dom.js",
   "description": "A virtual-dom module for frampton.js",
   "scripts": {
